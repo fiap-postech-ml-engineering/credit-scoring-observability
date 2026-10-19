@@ -1,0 +1,110 @@
+services:
+  # API de decisão de crédito. Também é o gateway de métricas: expõe no
+  # /metrics tanto as métricas ao vivo quanto as da última execução do
+  # pipeline batch, lidas de ./reports no momento do scrape.
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: credit-scoring-api
+
+    env_file:
+      - path: .env
+        required: false
+
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+
+    ports:
+      - "8000:8000"
+
+    # Alinha permissões dos bind mounts com o usuário do host em dev.
+    user: "${UID:-1000}:${GID:-1000}"
+
+    # Caminhos alinhados com o WORKDIR /app definido no Dockerfile.
+    volumes:
+      - ./src:/app/src
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./reports:/app/reports
+      - ./logs:/app/logs
+
+    command: uvicorn src.api.api:api --host 0.0.0.0 --port 8000 --reload
+
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+    networks:
+      - credit-net
+
+  # Servidor de rastreamento do MLflow. Reaproveita a imagem do projeto para
+  # garantir a mesma versão do cliente e do servidor.
+  mlflow:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: credit-scoring-mlflow
+
+    user: "${UID:-1000}:${GID:-1000}"
+
+    volumes:
+      - ./mlartifacts:/app/mlartifacts
+      - ./mlflow-data:/app/mlflow-data
+
+    command: >
+      mlflow server
+      --host 0.0.0.0
+      --port 5000
+      --backend-store-uri sqlite:////app/mlflow-data/mlflow.db
+      --default-artifact-root /app/mlartifacts
+
+    ports:
+      - "5000:5000"
+
+    networks:
+      - credit-net
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    container_name: credit-scoring-prometheus
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./observability/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      - api
+    networks:
+      - credit-net
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: credit-scoring-grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - credit-net
+
+networks:
+  credit-net:
+    driver: bridge
+
+volumes:
+  grafana-data:
