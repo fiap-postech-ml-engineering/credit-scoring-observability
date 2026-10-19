@@ -170,7 +170,11 @@ show_missing = true
 #################################################################################
 
 [tool.ty.src]
-exclude = ["notebooks/"]
+# notebooks/: células não são checadas por tipo. scripts/: utilitário
+# standalone (gera o notebook) que depende de nbformat, não declarado como
+# dependência do pacote — só precisa rodar na máquina de quem regenera o
+# notebook, não no ambiente type-checked de src/tests.
+exclude = ["notebooks/", "scripts/"]
 
 [tool.uv]
 environments = [
