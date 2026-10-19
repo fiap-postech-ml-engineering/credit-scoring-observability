@@ -117,6 +117,7 @@ extend-ignore = [
 # biblioteca; renomear para `self` quebraria a validação.
 "src/contracts/schemas.py" = ["N805"]
 "src/cli.py" = ["T20"]  # CLI usa rich.print para output ao usuário
+"scripts/*" = ["T20"]  # scripts standalone, não parte do pacote
 
 [tool.ruff.lint.isort]
 known-first-party = ["src"]

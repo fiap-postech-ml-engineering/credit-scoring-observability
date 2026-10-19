@@ -108,6 +108,8 @@ Em cerca de dois minutos isso baixa o dataset, treina o baseline, demonstra o co
 │   └── governance_lgpd.md      <- Etapa 4: LGPD, base legal, vieses e retenção
 │
 ├── models                  <- Artefato treinado (`credit_model.joblib`)
+├── notebooks
+│   └── analise_credit_scoring.ipynb  <- EDA, limpeza, modelo, drift e causalidade — visual, não é entregável do enunciado
 │
 ├── observability
 │   ├── prometheus.yml       <- Configuração de scrape
@@ -167,6 +169,7 @@ Em cerca de dois minutos isso baixa o dataset, treina o baseline, demonstra o co
 - [Observabilidade](docs/observability.md) — logs estruturados, MLflow, as métricas de saúde documentadas e os alertas
 - [Análise Causal](docs/causal_analysis.md) — o experimento fatorial que separa data drift de concept drift
 - [Governança e LGPD](docs/governance_lgpd.md) — base legal, decisão automatizada, vieses, retenção e segurança
+- [Notebook de Análise](notebooks/analise_credit_scoring.ipynb) — não é exigido pelo enunciado, mas reúne EDA, limpeza, modelo, os cinco lotes de drift e a atribuição causal visualmente, num só lugar
 
 ## 🔄 Fluxograma do projeto
 

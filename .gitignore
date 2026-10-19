@@ -71,6 +71,9 @@ dmypy.json
 .pyre/
 .pytype/
 
+# Jupyter
+.ipynb_checkpoints/
+
 # Documentation build output
 site/
 
