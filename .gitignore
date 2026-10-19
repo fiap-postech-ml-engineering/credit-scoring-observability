@@ -1,0 +1,79 @@
+# Dados (reproduzíveis via src/credit_scoring/dataset.py e src/drift/simulate.py)
+data/raw/*
+!data/raw/.gitkeep
+data/reference/*
+!data/reference/.gitkeep
+data/production/*
+!data/production/.gitkeep
+
+# Modelo treinado (reproduzível via src/credit_scoring/train.py)
+models/*.joblib
+!models/.gitkeep
+
+# Relatórios do Evidently: ~4 MB cada, 15 arquivos, todos reproduzíveis com
+# `make pipeline`. Versionamos o dashboard consolidado e os laudos em
+# JSON/CSV (textuais e diffáveis), além de dois relatórios do Evidently
+# escolhidos a dedo — ver a seção de Relatórios no README.
+reports/*.html
+!reports/dashboard.html
+!reports/2024-04_novo_perfil__data_drift.html
+!reports/2024-05_recessao__classification.html
+
+# Rastreamento do MLflow (local)
+mlflow.db
+mlflow-data/
+mlartifacts/
+mlruns/
+
+# Logs estruturados do pipeline
+logs/*.jsonl
+!logs/.gitkeep
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[codz]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+build/
+dist/
+eggs/
+.eggs/
+*.egg-info/
+*.egg
+MANIFEST
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+coverage.xml
+.hypothesis/
+.pytest_cache/
+
+# Environments
+.env
+.envrc
+.venv
+
+# Ruff
+.ruff_cache/
+
+# Type checkers
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+
+# Documentation build output
+site/
+
+# IDE files
+# .idea/
+# .vscode/

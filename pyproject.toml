@@ -1,0 +1,179 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "credit-scoring-observability"
+version = "0.1.0"
+description = "Camada de sustentação e confiabilidade para um modelo de Credit Scoring em produção: data contracts (Pandera), simulação e detecção de Data/Concept Drift (Evidently AI), observabilidade (MLflow + Prometheus/Grafana) e governança LGPD. FIAP MLE Tech Challenge — Fase 4."
+readme = "README.md"
+authors = [
+  {name = "Gustavo Dell Anhol Oliveira", email = "gustavo.dellanhol@gmail.com"},
+  {name = "Patrick Kwan", email = "p.kwan@unesp.br"}
+]
+maintainers = [
+  {name = "Gustavo Dell Anhol Oliveira", email = "gustavo.dellanhol@gmail.com"},
+  {name = "Patrick Kwan", email = "p.kwan@unesp.br"}
+]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Typing :: Typed",
+]
+license = { file = "LICENSE" }
+dependencies = [
+    "evidently>=0.7.0",
+    "fastapi>=0.136.1",
+    "jinja2>=3.1.0",
+    "joblib>=1.5.3",
+    "kagglehub>=0.3.0",
+    "matplotlib>=3.11.0",
+    "mlflow>=3.0.0",
+    "numpy>=2.1.0",
+    "pandas<4",
+    "pandera>=0.26.0",
+    "prometheus-client>=0.21.0",
+    "pydantic-settings>=2.14.1",
+    "python-dotenv",
+    "pyyaml>=6.0.3",
+    "rich",
+    "scikit-learn>=1.6.0",
+    "scipy>=1.14.0",
+    "typer",
+    "uvicorn>=0.47.0",
+    "xgboost>=2.1.0",
+]
+requires-python = ">=3.12,<3.14"
+
+[project.optional-dependencies]
+dev = [
+    "pre-commit>=4.6.0",
+    "ruff>=0.11.0",
+    "pytest>=8.0.0",
+    "pytest-cov>=6.0.0",
+    "ipykernel>=7.2.0",
+    "nbconvert>=7.16.0",
+]
+lint = [
+    "ruff",
+]
+test = [
+    "coverage",
+    "pytest",
+    "httpx",
+]
+typecheck = [
+    "ty",
+]
+
+[project.urls]
+bugs = "https://github.com/fiap-postech-ml-engineering/credit-scoring-observability/issues"
+changelog = "https://github.com/fiap-postech-ml-engineering/credit-scoring-observability/releases"
+homepage = "https://github.com/fiap-postech-ml-engineering/credit-scoring-observability"
+
+[project.scripts]
+credit-scoring = "src.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+#################################################################################
+# RUFF                                                                          #
+#################################################################################
+
+[tool.ruff]
+line-length = 99
+target-version = "py312"
+src = ["src", "tests"]
+exclude = [
+    ".git",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+    "*.egg-info",
+    "docs/",
+    "notebooks/",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "F",  # Pyflakes
+    "I",  # isort (import sorting)
+    "N",  # pep8-naming
+    "T20",  # flake8-print (proíbe print(), usar logging)
+    "W",  # pycodestyle warnings
+]
+extend-ignore = [
+    "E203",  # whitespace antes de ':' (conflita com ruff format)
+    "E501",  # line too long (delegado ao ruff format)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["F401"]
+# Os checks de DataFrame do Pandera recebem `cls` por contrato da própria
+# biblioteca; renomear para `self` quebraria a validação.
+"src/contracts/schemas.py" = ["N805"]
+"src/cli.py" = ["T20"]  # CLI usa rich.print para output ao usuário
+
+[tool.ruff.lint.isort]
+known-first-party = ["src"]
+force-sort-within-sections = true
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+#################################################################################
+# PYTEST                                                                        #
+#################################################################################
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short --strict-markers"
+minversion = "7.0"
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+markers = [
+    "unit: testes unitários (padrão)",
+    "integration: testes de integração entre componentes",
+    "contracts: testes dos data contracts (Pandera)",
+    "drift: testes de simulação e detecção de drift",
+    "model: testes de modelo/treino de ML",
+    "api: testes de endpoint FastAPI",
+    "slow: testes mais lentos (execute com -m 'not slow')",
+]
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+parallel = true
+omit = ["tests/*", "**/__init__.py", "*/tests/*", "*/__pycache__/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+]
+fail_under = 70
+show_missing = true
+
+#################################################################################
+# UV                                                                            #
+#################################################################################
+
+[tool.ty.src]
+exclude = ["notebooks/"]
+
+[tool.uv]
+environments = [
+    "sys_platform == 'darwin' and platform_machine == 'x86_64'",
+    "sys_platform == 'darwin' and platform_machine == 'arm64'",
+    "sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "sys_platform == 'win32' and platform_machine == 'AMD64'",
+]
