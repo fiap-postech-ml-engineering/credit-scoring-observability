@@ -60,6 +60,7 @@ lint = [
 test = [
     "coverage",
     "pytest",
+    "pytest-cov",
     "httpx",
 ]
 typecheck = [
