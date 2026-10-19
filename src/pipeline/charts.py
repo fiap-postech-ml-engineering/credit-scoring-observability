@@ -22,8 +22,11 @@ from dataclasses import dataclass
 import html
 from typing import Sequence
 
-# Rampa sequencial azul (100 -> 700) da paleta de referência. Mais escuro =
-# maior magnitude. Usada no heatmap de PSI.
+# Rampa sequencial azul (100 -> 700) da paleta de referência, usada no heatmap
+# de PSI. No tema CLARO, mais escuro = mais drift. No tema ESCURO a rampa é
+# invertida (ver `_ramp_css` em dashboard.py): sobre fundo escuro, "mais" tem
+# que ficar mais claro, senão o valor alto some na superfície. São passos
+# próprios por modo, não um flip automático de cor.
 SEQUENTIAL_BLUE = [
     "#cde2fb",
     "#b7d3f6",
@@ -64,13 +67,18 @@ def _dec(value: float, fmt: str = "{:.3f}") -> str:
     return fmt.format(value).replace(".", ",")
 
 
-def sequential_color(value: float, vmax: float) -> str:
-    """Mapeia um valor na rampa azul; `vmax` fixa a escala entre gráficos."""
+def sequential_step(value: float, vmax: float) -> int:
+    """Índice do passo da rampa para `value`; `vmax` fixa a escala do gráfico."""
     if vmax <= 0:
-        return SEQUENTIAL_BLUE[0]
+        return 0
     ratio = max(0.0, min(1.0, value / vmax))
-    index = int(round(ratio * (len(SEQUENTIAL_BLUE) - 1)))
-    return SEQUENTIAL_BLUE[index]
+    return int(round(ratio * (len(SEQUENTIAL_BLUE) - 1)))
+
+
+def sequential_color(value: float, vmax: float) -> str:
+    """Cor da rampa no tema claro. Para marcas que mudam com o tema, prefira
+    `sequential_step` + classe CSS, que permite passos próprios por modo."""
+    return SEQUENTIAL_BLUE[sequential_step(value, vmax)]
 
 
 def psi_heatmap(
@@ -119,20 +127,21 @@ def psi_heatmap(
         for col, batch in enumerate(batches):
             value = matrix[row][col]
             x = label_w + col * (cell_w + gap)
-            fill = sequential_color(value, vmax)
-            # Texto escuro sobre as faixas claras da rampa, claro sobre as escuras.
-            ink = "#0b0b0b" if value < vmax * 0.55 else "#ffffff"
+            step = sequential_step(value, vmax)
             severity = (
                 "drift"
                 if value >= alert_threshold
                 else ("atencao" if value >= warn_threshold else "estavel")
             )
+            # A cor do preenchimento e a do texto vêm do CSS (`.psi-N`), não de
+            # atributos inline: é o que permite ao heatmap ter uma rampa própria
+            # no tema escuro em vez de reaproveitar a clara.
             parts.append(
-                f'<g class="cell" data-severity="{severity}">'
+                f'<g class="cell psi-{step}" data-severity="{severity}">'
                 f"<title>{_esc(feature)} — {_esc(batch)}: PSI {_dec(value)} ({severity})</title>"
-                f'<rect x="{x}" y="{y}" width="{cell_w}" height="{cell_h}" rx="4" fill="{fill}"/>'
+                f'<rect x="{x}" y="{y}" width="{cell_w}" height="{cell_h}" rx="4"/>'
                 f'<text x="{x + cell_w / 2:.1f}" y="{y + cell_h / 2 + 4:.1f}" '
-                f'text-anchor="middle" class="cell-value" fill="{ink}">{_dec(value)}</text>'
+                f'text-anchor="middle" class="cell-value">{_dec(value)}</text>'
                 f"</g>"
             )
 

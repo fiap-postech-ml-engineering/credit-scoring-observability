@@ -31,7 +31,13 @@ import re
 from typing import TYPE_CHECKING, Any
 
 from src.config.settings import FEATURES, settings
-from src.pipeline.charts import Point, horizontal_bars, line_chart, psi_heatmap
+from src.pipeline.charts import (
+    SEQUENTIAL_BLUE,
+    Point,
+    horizontal_bars,
+    line_chart,
+    psi_heatmap,
+)
 
 if TYPE_CHECKING:  # pragma: no cover
     from src.pipeline.monitor import PipelineRun
@@ -279,6 +285,53 @@ def _contract_bars(reports_dir: Path) -> str:
     return horizontal_bars(points, unit_singular=" ocorrência", unit_plural=" ocorrências")
 
 
+def _ramp_css() -> str:
+    """CSS da rampa sequencial do heatmap, com passos próprios por tema.
+
+    Tema **claro**: a rampa vai do azul mais claro ao mais escuro — mais
+    escuro significa mais drift — e o texto vira branco na metade escura.
+
+    Tema **escuro**: a rampa é **invertida**. Sobre superfície escura, um
+    valor alto pintado de azul-marinho sumiria no fundo; quem precisa saltar
+    aos olhos é o drift, então ele recebe os passos claros. Não é um flip
+    automático: é a mesma rampa documentada, com os passos escolhidos para a
+    superfície em que de fato é renderizada.
+
+    Em ambos os temas o valor numérico vai impresso na célula, então a
+    informação nunca depende de distinguir tons.
+    """
+    ramp = SEQUENTIAL_BLUE
+    last = len(ramp) - 1
+    dark_from = 7  # a partir deste passo a rampa é escura e pede tinta clara
+
+    def rules(dark_mode: bool, prefix: str = "") -> str:
+        out: list[str] = []
+        for i in range(len(ramp)):
+            if dark_mode:
+                color = ramp[last - i]
+                ink = "#ffffff" if i < (last - dark_from) else "#0b0b0b"
+            else:
+                color = ramp[i]
+                ink = "#0b0b0b" if i < dark_from else "#ffffff"
+            out.append(f"{prefix}.psi-{i} rect {{ fill: {color}; }}")
+            out.append(f"{prefix}.psi-{i} .cell-value {{ fill: {ink}; }}")
+        return "\n".join(out)
+
+    # Mesma disciplina de escopo do resto da folha: a media query cobre a
+    # preferência do sistema, e o seletor data-theme vence nos dois sentidos.
+    media_scope = ':root:not([data-theme="light"]) '
+    toggle_scope = ':root[data-theme="dark"] '
+
+    return (
+        rules(dark_mode=False)
+        + "\n@media (prefers-color-scheme: dark) {\n"
+        + rules(dark_mode=True, prefix=media_scope)
+        + "\n}\n"
+        + rules(dark_mode=True, prefix=toggle_scope)
+        + "\n"
+    )
+
+
 _CSS = """
 :root {
   color-scheme: light;
@@ -394,7 +447,7 @@ h2 { font-size: 1.0625rem; margin: 0 0 4px; }
 .legend-item { display: inline-flex; align-items: center; gap: 7px; }
 .swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
 .ramp { display: inline-flex; height: 12px; border-radius: 3px; overflow: hidden; }
-.ramp span { width: 18px; }
+.ramp-chip { width: 18px; height: 12px; display: block; }
 
 .badge {
   display: inline-flex; align-items: center; gap: 5px;
@@ -510,9 +563,12 @@ def render_dashboard(
         value_format="{:.3f}",
     )
 
+    # A legenda reusa as classes da rampa para acompanhar o tema junto com
+    # o heatmap, em vez de congelar as cores do tema claro.
     ramp_html = "".join(
-        f'<span style="background:{c}"></span>'
-        for c in ["#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95", "#0d366b"]
+        f'<svg class="ramp-chip psi-{step}" viewBox="0 0 1 1" aria-hidden="true">'
+        f'<rect width="1" height="1"/></svg>'
+        for step in (0, 2, 4, 6, 8, 10, 12)
     )
 
     def _drifted_cell(run: PipelineRun) -> str:
@@ -554,7 +610,7 @@ def render_dashboard(
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Observabilidade de Credit Scoring</title>
-<style>{_CSS}</style>
+<style>{_CSS}\n{_ramp_css()}</style>
 </head>
 <body>
 <div class="wrap">
@@ -573,12 +629,13 @@ def render_dashboard(
 
 <section>
   <h2>Drift por feature e por lote (PSI)</h2>
-  <p class="hint">Mais escuro, mais drift. O valor vai impresso em cada célula, então a
-  leitura não depende de distinguir tons. Compare a última coluna com as duas anteriores:
-  na recessão o PSI praticamente não se move — e é justamente o lote mais caro.</p>
+  <p class="hint">Quanto mais a célula se destaca do fundo, maior o drift. O valor vai
+  impresso em cada uma, então a leitura nunca depende de distinguir tons. Compare a última
+  coluna com as duas anteriores: na recessão o PSI praticamente não se move — e é
+  justamente o lote mais caro.</p>
   {heatmap}
   <div class="legend">
-    <span class="legend-item">PSI <span class="ramp">{ramp_html}</span> maior</span>
+    <span class="legend-item">PSI menor <span class="ramp">{ramp_html}</span> maior</span>
     <span class="legend-item">estável &lt; {_num(settings.psi_warn_threshold, 2)}</span>
     <span class="legend-item">atenção {_num(settings.psi_warn_threshold, 2)}–{_num(settings.psi_alert_threshold, 2)}</span>
     <span class="legend-item">drift &gt; {_num(settings.psi_alert_threshold, 2)}</span>

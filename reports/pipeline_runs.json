@@ -8,35 +8,35 @@
       {
         "name": "ingestao",
         "status": "sucesso",
-        "duration_seconds": 0.0056,
+        "duration_seconds": 0.0053,
         "detail": ""
       },
       {
         "name": "validacao",
         "status": "sucesso",
-        "duration_seconds": 0.0106,
+        "duration_seconds": 0.0117,
         "detail": ""
       },
       {
         "name": "inferencia",
         "status": "sucesso",
-        "duration_seconds": 0.0066,
+        "duration_seconds": 0.0317,
         "detail": ""
       },
       {
         "name": "deteccao_drift",
         "status": "sucesso",
-        "duration_seconds": 4.0348,
+        "duration_seconds": 3.5995,
         "detail": ""
       },
       {
         "name": "publicacao",
         "status": "sucesso",
-        "duration_seconds": 0.8911,
+        "duration_seconds": 0.6993,
         "detail": ""
       }
     ],
-    "total_duration_seconds": 4.9487,
+    "total_duration_seconds": 4.3475,
     "validation": {
       "batch_name": "2024-01_estavel",
       "schema_name": "CreditReferenceContract",
@@ -46,7 +46,7 @@
       "rejection_rate": 0.0,
       "rules_violated": [],
       "failures_by_rule": {},
-      "validated_at": "2026-10-19T13:33:04.916590+00:00"
+      "validated_at": "2026-10-19T13:38:55.745331+00:00"
     },
     "drift": {
       "batch_name": "2024-01_estavel",
@@ -106,9 +106,9 @@
         "data_summary": "/root/credit-scoring-observability/reports/2024-01_estavel__data_summary.html",
         "classification": "/root/credit-scoring-observability/reports/2024-01_estavel__classification.html"
       },
-      "evaluated_at": "2026-10-19T13:33:05.039653+00:00"
+      "evaluated_at": "2026-10-19T13:38:55.903439+00:00"
     },
-    "mlflow_run_id": "5ac43ebd3c39482193d44d237a17b432",
+    "mlflow_run_id": "14e0101b83fd410d9bfe1395832410f7",
     "artifacts": [
       "/root/credit-scoring-observability/reports/2024-01_estavel__validation.json",
       "/root/credit-scoring-observability/reports/2024-01_estavel__drift.json",
@@ -117,9 +117,9 @@
       "/root/credit-scoring-observability/reports/2024-01_estavel__data_summary.html",
       "/root/credit-scoring-observability/reports/2024-01_estavel__classification.html"
     ],
-    "started_at": "2026-10-19T13:33:04.900149+00:00",
-    "finished_at": "2026-10-19T13:33:09.887876+00:00",
-    "finished_at_epoch": 1792416789.8878798
+    "started_at": "2026-10-19T13:38:55.728112+00:00",
+    "finished_at": "2026-10-19T13:39:00.120202+00:00",
+    "finished_at_epoch": 1792417140.120206
   },
   {
     "batch": "2024-02_inflacao_leve",
@@ -136,29 +136,29 @@
       {
         "name": "validacao",
         "status": "sucesso",
-        "duration_seconds": 0.0118,
+        "duration_seconds": 0.0119,
         "detail": ""
       },
       {
         "name": "inferencia",
         "status": "sucesso",
-        "duration_seconds": 0.0054,
+        "duration_seconds": 0.0053,
         "detail": ""
       },
       {
         "name": "deteccao_drift",
         "status": "sucesso",
-        "duration_seconds": 3.8874,
+        "duration_seconds": 3.6898,
         "detail": ""
       },
       {
         "name": "publicacao",
         "status": "sucesso",
-        "duration_seconds": 0.0518,
+        "duration_seconds": 0.0512,
         "detail": ""
       }
     ],
-    "total_duration_seconds": 3.9616,
+    "total_duration_seconds": 3.7634,
     "validation": {
       "batch_name": "2024-02_inflacao_leve",
       "schema_name": "CreditReferenceContract",
@@ -168,7 +168,7 @@
       "rejection_rate": 0.0,
       "rules_violated": [],
       "failures_by_rule": {},
-      "validated_at": "2026-10-19T13:33:09.905394+00:00"
+      "validated_at": "2026-10-19T13:39:00.137905+00:00"
     },
     "drift": {
       "batch_name": "2024-02_inflacao_leve",
@@ -228,9 +228,9 @@
         "data_summary": "/root/credit-scoring-observability/reports/2024-02_inflacao_leve__data_summary.html",
         "classification": "/root/credit-scoring-observability/reports/2024-02_inflacao_leve__classification.html"
       },
-      "evaluated_at": "2026-10-19T13:33:10.028567+00:00"
+      "evaluated_at": "2026-10-19T13:39:00.259052+00:00"
     },
-    "mlflow_run_id": "8957ad0a9e624229afe8d915eab14ac1",
+    "mlflow_run_id": "718d4e9099cc4006b981f13ad7b9165a",
     "artifacts": [
       "/root/credit-scoring-observability/reports/2024-02_inflacao_leve__validation.json",
       "/root/credit-scoring-observability/reports/2024-02_inflacao_leve__drift.json",
@@ -239,9 +239,9 @@
       "/root/credit-scoring-observability/reports/2024-02_inflacao_leve__data_summary.html",
       "/root/credit-scoring-observability/reports/2024-02_inflacao_leve__classification.html"
     ],
-    "started_at": "2026-10-19T13:33:09.888228+00:00",
-    "finished_at": "2026-10-19T13:33:13.883739+00:00",
-    "finished_at_epoch": 1792416793.8837438
+    "started_at": "2026-10-19T13:39:00.120625+00:00",
+    "finished_at": "2026-10-19T13:39:03.916601+00:00",
+    "finished_at_epoch": 1792417143.9166052
   },
   {
     "batch": "2024-03_inflacao_forte",
@@ -255,35 +255,35 @@
       {
         "name": "ingestao",
         "status": "sucesso",
-        "duration_seconds": 0.0059,
+        "duration_seconds": 0.0055,
         "detail": ""
       },
       {
         "name": "validacao",
         "status": "sucesso",
-        "duration_seconds": 0.0113,
+        "duration_seconds": 0.0117,
         "detail": ""
       },
       {
         "name": "inferencia",
         "status": "sucesso",
-        "duration_seconds": 0.0075,
+        "duration_seconds": 0.0061,
         "detail": ""
       },
       {
         "name": "deteccao_drift",
         "status": "sucesso",
-        "duration_seconds": 3.8729,
+        "duration_seconds": 3.8239,
         "detail": ""
       },
       {
         "name": "publicacao",
         "status": "sucesso",
-        "duration_seconds": 0.0529,
+        "duration_seconds": 0.0485,
         "detail": ""
       }
     ],
-    "total_duration_seconds": 3.9505,
+    "total_duration_seconds": 3.8957,
     "validation": {
       "batch_name": "2024-03_inflacao_forte",
       "schema_name": "CreditReferenceContract",
@@ -293,7 +293,7 @@
       "rejection_rate": 0.0,
       "rules_violated": [],
       "failures_by_rule": {},
-      "validated_at": "2026-10-19T13:33:13.901979+00:00"
+      "validated_at": "2026-10-19T13:39:03.935067+00:00"
     },
     "drift": {
       "batch_name": "2024-03_inflacao_forte",
@@ -359,9 +359,9 @@
         "data_summary": "/root/credit-scoring-observability/reports/2024-03_inflacao_forte__data_summary.html",
         "classification": "/root/credit-scoring-observability/reports/2024-03_inflacao_forte__classification.html"
       },
-      "evaluated_at": "2026-10-19T13:33:14.035126+00:00"
+      "evaluated_at": "2026-10-19T13:39:04.053771+00:00"
     },
-    "mlflow_run_id": "fde635741487494f8a4e741b92d5b014",
+    "mlflow_run_id": "e1881dce9cd7450bbf2e566082e470f9",
     "artifacts": [
       "/root/credit-scoring-observability/reports/2024-03_inflacao_forte__validation.json",
       "/root/credit-scoring-observability/reports/2024-03_inflacao_forte__drift.json",
@@ -370,9 +370,9 @@
       "/root/credit-scoring-observability/reports/2024-03_inflacao_forte__data_summary.html",
       "/root/credit-scoring-observability/reports/2024-03_inflacao_forte__classification.html"
     ],
-    "started_at": "2026-10-19T13:33:13.884556+00:00",
-    "finished_at": "2026-10-19T13:33:17.872910+00:00",
-    "finished_at_epoch": 1792416797.8729148
+    "started_at": "2026-10-19T13:39:03.917614+00:00",
+    "finished_at": "2026-10-19T13:39:07.844367+00:00",
+    "finished_at_epoch": 1792417147.8443716
   },
   {
     "batch": "2024-04_novo_perfil",
@@ -387,13 +387,13 @@
       {
         "name": "ingestao",
         "status": "sucesso",
-        "duration_seconds": 0.006,
+        "duration_seconds": 0.0051,
         "detail": ""
       },
       {
         "name": "validacao",
         "status": "sucesso",
-        "duration_seconds": 0.0112,
+        "duration_seconds": 0.0115,
         "detail": ""
       },
       {
@@ -405,17 +405,17 @@
       {
         "name": "deteccao_drift",
         "status": "sucesso",
-        "duration_seconds": 3.7339,
+        "duration_seconds": 3.5216,
         "detail": ""
       },
       {
         "name": "publicacao",
         "status": "sucesso",
-        "duration_seconds": 0.0526,
+        "duration_seconds": 0.0486,
         "detail": ""
       }
     ],
-    "total_duration_seconds": 3.809,
+    "total_duration_seconds": 3.5921,
     "validation": {
       "batch_name": "2024-04_novo_perfil",
       "schema_name": "CreditReferenceContract",
@@ -425,7 +425,7 @@
       "rejection_rate": 0.0,
       "rules_violated": [],
       "failures_by_rule": {},
-      "validated_at": "2026-10-19T13:33:17.891638+00:00"
+      "validated_at": "2026-10-19T13:39:07.862335+00:00"
     },
     "drift": {
       "batch_name": "2024-04_novo_perfil",
@@ -493,9 +493,9 @@
         "data_summary": "/root/credit-scoring-observability/reports/2024-04_novo_perfil__data_summary.html",
         "classification": "/root/credit-scoring-observability/reports/2024-04_novo_perfil__classification.html"
       },
-      "evaluated_at": "2026-10-19T13:33:18.013947+00:00"
+      "evaluated_at": "2026-10-19T13:39:08.001511+00:00"
     },
-    "mlflow_run_id": "2c60184407af4535a2e130f94a28dbc2",
+    "mlflow_run_id": "a33c5c9affe44ed698bfed9748700255",
     "artifacts": [
       "/root/credit-scoring-observability/reports/2024-04_novo_perfil__validation.json",
       "/root/credit-scoring-observability/reports/2024-04_novo_perfil__drift.json",
@@ -504,9 +504,9 @@
       "/root/credit-scoring-observability/reports/2024-04_novo_perfil__data_summary.html",
       "/root/credit-scoring-observability/reports/2024-04_novo_perfil__classification.html"
     ],
-    "started_at": "2026-10-19T13:33:17.874198+00:00",
-    "finished_at": "2026-10-19T13:33:21.717015+00:00",
-    "finished_at_epoch": 1792416801.7170193
+    "started_at": "2026-10-19T13:39:07.845569+00:00",
+    "finished_at": "2026-10-19T13:39:11.488066+00:00",
+    "finished_at_epoch": 1792417151.4880707
   },
   {
     "batch": "2024-05_recessao",
@@ -520,35 +520,35 @@
       {
         "name": "ingestao",
         "status": "sucesso",
-        "duration_seconds": 0.0043,
+        "duration_seconds": 0.0044,
         "detail": ""
       },
       {
         "name": "validacao",
         "status": "sucesso",
-        "duration_seconds": 0.0117,
+        "duration_seconds": 0.0114,
         "detail": ""
       },
       {
         "name": "inferencia",
         "status": "sucesso",
-        "duration_seconds": 0.0054,
+        "duration_seconds": 0.0055,
         "detail": ""
       },
       {
         "name": "deteccao_drift",
         "status": "sucesso",
-        "duration_seconds": 3.7407,
+        "duration_seconds": 3.7219,
         "detail": ""
       },
       {
         "name": "publicacao",
         "status": "sucesso",
-        "duration_seconds": 0.0485,
+        "duration_seconds": 0.0526,
         "detail": ""
       }
     ],
-    "total_duration_seconds": 3.8106,
+    "total_duration_seconds": 3.7958,
     "validation": {
       "batch_name": "2024-05_recessao",
       "schema_name": "CreditReferenceContract",
@@ -558,7 +558,7 @@
       "rejection_rate": 0.0,
       "rules_violated": [],
       "failures_by_rule": {},
-      "validated_at": "2026-10-19T13:33:21.734715+00:00"
+      "validated_at": "2026-10-19T13:39:11.505607+00:00"
     },
     "drift": {
       "batch_name": "2024-05_recessao",
@@ -621,9 +621,9 @@
         "data_summary": "/root/credit-scoring-observability/reports/2024-05_recessao__data_summary.html",
         "classification": "/root/credit-scoring-observability/reports/2024-05_recessao__classification.html"
       },
-      "evaluated_at": "2026-10-19T13:33:21.855643+00:00"
+      "evaluated_at": "2026-10-19T13:39:11.618616+00:00"
     },
-    "mlflow_run_id": "932fb3c28c73492db98fb6ce70213c8a",
+    "mlflow_run_id": "811926bddd904b7c99ae5073ebaaa486",
     "artifacts": [
       "/root/credit-scoring-observability/reports/2024-05_recessao__validation.json",
       "/root/credit-scoring-observability/reports/2024-05_recessao__drift.json",
@@ -632,8 +632,8 @@
       "/root/credit-scoring-observability/reports/2024-05_recessao__data_summary.html",
       "/root/credit-scoring-observability/reports/2024-05_recessao__classification.html"
     ],
-    "started_at": "2026-10-19T13:33:21.718418+00:00",
-    "finished_at": "2026-10-19T13:33:25.567193+00:00",
-    "finished_at_epoch": 1792416805.5671973
+    "started_at": "2026-10-19T13:39:11.489514+00:00",
+    "finished_at": "2026-10-19T13:39:15.316562+00:00",
+    "finished_at_epoch": 1792417155.3165672
   }
 ]
