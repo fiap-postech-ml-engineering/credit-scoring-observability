@@ -1,0 +1,70 @@
+# Regras de alerta sobre as métricas de drift e de saúde do pipeline.
+#
+# Os limiares espelham `src/config/settings.py`. Mantê-los sincronizados é
+# intencional: o pipeline já marca o alerta no laudo, e o Prometheus apenas
+# o promove a notificação — a regra de negócio vive num lugar só.
+groups:
+  - name: credit-scoring-drift
+    rules:
+      - alert: DegradacaoSilenciosa
+        expr: credit_silent_degradation > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Degradação silenciosa no lote {{ $labels.batch }}"
+          description: >
+            O desempenho do modelo caiu além do limiar sem que nenhuma feature
+            acusasse drift. Assinatura de concept drift: a relação entre as
+            features e a inadimplência mudou. Investigar retreino imediato.
+
+      - alert: DriftDeFeature
+        expr: credit_max_psi >= 0.25
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PSI de {{ $labels.batch }} em {{ $value | printf \"%.3f\" }}"
+          description: >
+            Ao menos uma feature cruzou o limiar de PSI de 0,25. Conferir o
+            relatório de data drift do Evidently para identificar quais.
+
+      - alert: QuedaDeDesempenho
+        expr: credit_model_performance_delta{metric="roc_auc"} <= -0.03
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "ROC AUC de {{ $labels.batch }} caiu {{ $value | printf \"%.4f\" }}"
+          description: >
+            O poder discriminante do modelo caiu além do limiar aceitável
+            contra a baseline de validação.
+
+      - alert: ContratoDeDadosViolado
+        expr: credit_contract_passed == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Contrato de dados bloqueou o lote {{ $labels.batch }}"
+          description: >
+            A ingestão foi interrompida pelo portão de dados. Nenhuma linha
+            deste lote chegou ao modelo. Conferir o laudo de validação.
+
+  - name: credit-scoring-pipeline
+    rules:
+      - alert: TarefaDoPipelineFalhou
+        expr: credit_pipeline_task_status == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Tarefa {{ $labels.task }} falhou no lote {{ $labels.batch }}"
+
+      - alert: ApiIndisponivel
+        expr: up{job="credit-scoring-api"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "API de Credit Scoring fora do ar"
