@@ -1,0 +1,639 @@
+[
+  {
+    "batch": "2024-01_estavel",
+    "status": "sucesso",
+    "n_rows": 8000,
+    "alerts": [],
+    "tasks": [
+      {
+        "name": "ingestao",
+        "status": "sucesso",
+        "duration_seconds": 0.0056,
+        "detail": ""
+      },
+      {
+        "name": "validacao",
+        "status": "sucesso",
+        "duration_seconds": 0.0106,
+        "detail": ""
+      },
+      {
+        "name": "inferencia",
+        "status": "sucesso",
+        "duration_seconds": 0.0066,
+        "detail": ""
+      },
+      {
+        "name": "deteccao_drift",
+        "status": "sucesso",
+        "duration_seconds": 4.0348,
+        "detail": ""
+      },
+      {
+        "name": "publicacao",
+        "status": "sucesso",
+        "duration_seconds": 0.8911,
+        "detail": ""
+      }
+    ],
+    "total_duration_seconds": 4.9487,
+    "validation": {
+      "batch_name": "2024-01_estavel",
+      "schema_name": "CreditReferenceContract",
+      "passed": true,
+      "n_rows": 8000,
+      "n_failures": 0,
+      "rejection_rate": 0.0,
+      "rules_violated": [],
+      "failures_by_rule": {},
+      "validated_at": "2026-10-19T13:33:04.916590+00:00"
+    },
+    "drift": {
+      "batch_name": "2024-01_estavel",
+      "n_rows": 8000,
+      "labeled": true,
+      "summary": {
+        "n_features": 10,
+        "n_drifted": 0,
+        "drift_share": 0.0,
+        "dataset_drift": false,
+        "max_psi": 0.00172,
+        "drifted_features": []
+      },
+      "performance": {
+        "roc_auc": 0.8711105494154395,
+        "pr_auc": 0.3739201192620186,
+        "ks_statistic": 0.6069087866953097,
+        "brier": 0.13584436300193395,
+        "precision": 0.2174851592012952,
+        "recall": 0.7933070866141733,
+        "f1": 0.34138077085980517,
+        "default_rate": 0.0635,
+        "approval_rate": 0.768375,
+        "approved_bad_rate": 0.01708150317227916,
+        "n_rows": 8000.0
+      },
+      "performance_delta": {
+        "roc_auc": 0.002433,
+        "pr_auc": -0.015101,
+        "ks_statistic": 0.014907,
+        "brier": -0.000518,
+        "precision": -0.006711,
+        "recall": 0.024701,
+        "f1": -0.005754,
+        "default_rate": -0.003104,
+        "approval_rate": -0.003289,
+        "approved_bad_rate": -0.00289,
+        "n_rows": -14191.0
+      },
+      "alerts": [],
+      "performance_degraded": false,
+      "silent_degradation": false,
+      "psi_by_feature": {
+        "MonthlyIncome": 0.00172,
+        "age": 0.001424,
+        "NumberOfOpenCreditLinesAndLoans": 0.001218,
+        "RevolvingUtilizationOfUnsecuredLines": 0.001104,
+        "DebtRatio": 0.000958,
+        "NumberOfTime30-59DaysPastDueNotWorse": 0.00041,
+        "NumberOfDependents": 0.000214,
+        "NumberRealEstateLoansOrLines": 0.000166,
+        "NumberOfTimes90DaysLate": 0.0,
+        "NumberOfTime60-89DaysPastDueNotWorse": 0.0
+      },
+      "html_reports": {
+        "data_drift": "/root/credit-scoring-observability/reports/2024-01_estavel__data_drift.html",
+        "data_summary": "/root/credit-scoring-observability/reports/2024-01_estavel__data_summary.html",
+        "classification": "/root/credit-scoring-observability/reports/2024-01_estavel__classification.html"
+      },
+      "evaluated_at": "2026-10-19T13:33:05.039653+00:00"
+    },
+    "mlflow_run_id": "5ac43ebd3c39482193d44d237a17b432",
+    "artifacts": [
+      "/root/credit-scoring-observability/reports/2024-01_estavel__validation.json",
+      "/root/credit-scoring-observability/reports/2024-01_estavel__drift.json",
+      "/root/credit-scoring-observability/reports/2024-01_estavel__psi_ks.csv",
+      "/root/credit-scoring-observability/reports/2024-01_estavel__data_drift.html",
+      "/root/credit-scoring-observability/reports/2024-01_estavel__data_summary.html",
+      "/root/credit-scoring-observability/reports/2024-01_estavel__classification.html"
+    ],
+    "started_at": "2026-10-19T13:33:04.900149+00:00",
+    "finished_at": "2026-10-19T13:33:09.887876+00:00",
+    "finished_at_epoch": 1792416789.8878798
+  },
+  {
+    "batch": "2024-02_inflacao_leve",
+    "status": "sucesso",
+    "n_rows": 8000,
+    "alerts": [],
+    "tasks": [
+      {
+        "name": "ingestao",
+        "status": "sucesso",
+        "duration_seconds": 0.0052,
+        "detail": ""
+      },
+      {
+        "name": "validacao",
+        "status": "sucesso",
+        "duration_seconds": 0.0118,
+        "detail": ""
+      },
+      {
+        "name": "inferencia",
+        "status": "sucesso",
+        "duration_seconds": 0.0054,
+        "detail": ""
+      },
+      {
+        "name": "deteccao_drift",
+        "status": "sucesso",
+        "duration_seconds": 3.8874,
+        "detail": ""
+      },
+      {
+        "name": "publicacao",
+        "status": "sucesso",
+        "duration_seconds": 0.0518,
+        "detail": ""
+      }
+    ],
+    "total_duration_seconds": 3.9616,
+    "validation": {
+      "batch_name": "2024-02_inflacao_leve",
+      "schema_name": "CreditReferenceContract",
+      "passed": true,
+      "n_rows": 8000,
+      "n_failures": 0,
+      "rejection_rate": 0.0,
+      "rules_violated": [],
+      "failures_by_rule": {},
+      "validated_at": "2026-10-19T13:33:09.905394+00:00"
+    },
+    "drift": {
+      "batch_name": "2024-02_inflacao_leve",
+      "n_rows": 8000,
+      "labeled": true,
+      "summary": {
+        "n_features": 10,
+        "n_drifted": 0,
+        "drift_share": 0.0,
+        "dataset_drift": false,
+        "max_psi": 0.055324,
+        "drifted_features": []
+      },
+      "performance": {
+        "roc_auc": 0.8618803523964441,
+        "pr_auc": 0.39345458934749217,
+        "ks_statistic": 0.5760463885774874,
+        "brier": 0.1372441419241049,
+        "precision": 0.21451787648970747,
+        "recall": 0.7659574468085106,
+        "f1": 0.3351671603893356,
+        "default_rate": 0.064625,
+        "approval_rate": 0.76925,
+        "approved_bad_rate": 0.019662008449788757,
+        "n_rows": 8000.0
+      },
+      "performance_delta": {
+        "roc_auc": -0.006797,
+        "pr_auc": 0.004434,
+        "ks_statistic": -0.015956,
+        "brier": 0.000882,
+        "precision": -0.009678,
+        "recall": -0.002649,
+        "f1": -0.011968,
+        "default_rate": -0.001979,
+        "approval_rate": -0.002414,
+        "approved_bad_rate": -0.00031,
+        "n_rows": -14191.0
+      },
+      "alerts": [],
+      "performance_degraded": false,
+      "silent_degradation": false,
+      "psi_by_feature": {
+        "MonthlyIncome": 0.055324,
+        "NumberOfOpenCreditLinesAndLoans": 0.002217,
+        "DebtRatio": 0.001324,
+        "RevolvingUtilizationOfUnsecuredLines": 0.001126,
+        "age": 0.000874,
+        "NumberOfDependents": 0.000477,
+        "NumberRealEstateLoansOrLines": 4.7e-05,
+        "NumberOfTime30-59DaysPastDueNotWorse": 8e-06,
+        "NumberOfTimes90DaysLate": 0.0,
+        "NumberOfTime60-89DaysPastDueNotWorse": 0.0
+      },
+      "html_reports": {
+        "data_drift": "/root/credit-scoring-observability/reports/2024-02_inflacao_leve__data_drift.html",
+        "data_summary": "/root/credit-scoring-observability/reports/2024-02_inflacao_leve__data_summary.html",
+        "classification": "/root/credit-scoring-observability/reports/2024-02_inflacao_leve__classification.html"
+      },
+      "evaluated_at": "2026-10-19T13:33:10.028567+00:00"
+    },
+    "mlflow_run_id": "8957ad0a9e624229afe8d915eab14ac1",
+    "artifacts": [
+      "/root/credit-scoring-observability/reports/2024-02_inflacao_leve__validation.json",
+      "/root/credit-scoring-observability/reports/2024-02_inflacao_leve__drift.json",
+      "/root/credit-scoring-observability/reports/2024-02_inflacao_leve__psi_ks.csv",
+      "/root/credit-scoring-observability/reports/2024-02_inflacao_leve__data_drift.html",
+      "/root/credit-scoring-observability/reports/2024-02_inflacao_leve__data_summary.html",
+      "/root/credit-scoring-observability/reports/2024-02_inflacao_leve__classification.html"
+    ],
+    "started_at": "2026-10-19T13:33:09.888228+00:00",
+    "finished_at": "2026-10-19T13:33:13.883739+00:00",
+    "finished_at_epoch": 1792416793.8837438
+  },
+  {
+    "batch": "2024-03_inflacao_forte",
+    "status": "sucesso",
+    "n_rows": 8000,
+    "alerts": [
+      "queda_de_desempenho",
+      "drift_de_feature"
+    ],
+    "tasks": [
+      {
+        "name": "ingestao",
+        "status": "sucesso",
+        "duration_seconds": 0.0059,
+        "detail": ""
+      },
+      {
+        "name": "validacao",
+        "status": "sucesso",
+        "duration_seconds": 0.0113,
+        "detail": ""
+      },
+      {
+        "name": "inferencia",
+        "status": "sucesso",
+        "duration_seconds": 0.0075,
+        "detail": ""
+      },
+      {
+        "name": "deteccao_drift",
+        "status": "sucesso",
+        "duration_seconds": 3.8729,
+        "detail": ""
+      },
+      {
+        "name": "publicacao",
+        "status": "sucesso",
+        "duration_seconds": 0.0529,
+        "detail": ""
+      }
+    ],
+    "total_duration_seconds": 3.9505,
+    "validation": {
+      "batch_name": "2024-03_inflacao_forte",
+      "schema_name": "CreditReferenceContract",
+      "passed": true,
+      "n_rows": 8000,
+      "n_failures": 0,
+      "rejection_rate": 0.0,
+      "rules_violated": [],
+      "failures_by_rule": {},
+      "validated_at": "2026-10-19T13:33:13.901979+00:00"
+    },
+    "drift": {
+      "batch_name": "2024-03_inflacao_forte",
+      "n_rows": 8000,
+      "labeled": true,
+      "summary": {
+        "n_features": 10,
+        "n_drifted": 2,
+        "drift_share": 0.2,
+        "dataset_drift": false,
+        "max_psi": 0.467167,
+        "drifted_features": [
+          "MonthlyIncome",
+          "DebtRatio"
+        ]
+      },
+      "performance": {
+        "roc_auc": 0.8311067302998071,
+        "pr_auc": 0.3110039350998424,
+        "ks_statistic": 0.5192454715484603,
+        "brier": 0.19330949023278424,
+        "precision": 0.1548311990686845,
+        "recall": 0.7932405566600398,
+        "f1": 0.2590909090909091,
+        "default_rate": 0.062875,
+        "approval_rate": 0.677875,
+        "approved_bad_rate": 0.019177576986907616,
+        "n_rows": 8000.0
+      },
+      "performance_delta": {
+        "roc_auc": -0.037571,
+        "pr_auc": -0.078017,
+        "ks_statistic": -0.072756,
+        "brier": 0.056947,
+        "precision": -0.069365,
+        "recall": 0.024634,
+        "f1": -0.088044,
+        "default_rate": -0.003729,
+        "approval_rate": -0.093789,
+        "approved_bad_rate": -0.000794,
+        "n_rows": -14191.0
+      },
+      "alerts": [
+        "queda_de_desempenho",
+        "drift_de_feature"
+      ],
+      "performance_degraded": true,
+      "silent_degradation": false,
+      "psi_by_feature": {
+        "MonthlyIncome": 0.467167,
+        "DebtRatio": 0.260764,
+        "RevolvingUtilizationOfUnsecuredLines": 0.132358,
+        "NumberOfOpenCreditLinesAndLoans": 0.000786,
+        "age": 0.000565,
+        "NumberOfDependents": 0.000239,
+        "NumberRealEstateLoansOrLines": 0.000185,
+        "NumberOfTime30-59DaysPastDueNotWorse": 2.6e-05,
+        "NumberOfTimes90DaysLate": 0.0,
+        "NumberOfTime60-89DaysPastDueNotWorse": 0.0
+      },
+      "html_reports": {
+        "data_drift": "/root/credit-scoring-observability/reports/2024-03_inflacao_forte__data_drift.html",
+        "data_summary": "/root/credit-scoring-observability/reports/2024-03_inflacao_forte__data_summary.html",
+        "classification": "/root/credit-scoring-observability/reports/2024-03_inflacao_forte__classification.html"
+      },
+      "evaluated_at": "2026-10-19T13:33:14.035126+00:00"
+    },
+    "mlflow_run_id": "fde635741487494f8a4e741b92d5b014",
+    "artifacts": [
+      "/root/credit-scoring-observability/reports/2024-03_inflacao_forte__validation.json",
+      "/root/credit-scoring-observability/reports/2024-03_inflacao_forte__drift.json",
+      "/root/credit-scoring-observability/reports/2024-03_inflacao_forte__psi_ks.csv",
+      "/root/credit-scoring-observability/reports/2024-03_inflacao_forte__data_drift.html",
+      "/root/credit-scoring-observability/reports/2024-03_inflacao_forte__data_summary.html",
+      "/root/credit-scoring-observability/reports/2024-03_inflacao_forte__classification.html"
+    ],
+    "started_at": "2026-10-19T13:33:13.884556+00:00",
+    "finished_at": "2026-10-19T13:33:17.872910+00:00",
+    "finished_at_epoch": 1792416797.8729148
+  },
+  {
+    "batch": "2024-04_novo_perfil",
+    "status": "sucesso",
+    "n_rows": 8000,
+    "alerts": [
+      "queda_de_desempenho",
+      "drift_de_dataset",
+      "drift_de_feature"
+    ],
+    "tasks": [
+      {
+        "name": "ingestao",
+        "status": "sucesso",
+        "duration_seconds": 0.006,
+        "detail": ""
+      },
+      {
+        "name": "validacao",
+        "status": "sucesso",
+        "duration_seconds": 0.0112,
+        "detail": ""
+      },
+      {
+        "name": "inferencia",
+        "status": "sucesso",
+        "duration_seconds": 0.0053,
+        "detail": ""
+      },
+      {
+        "name": "deteccao_drift",
+        "status": "sucesso",
+        "duration_seconds": 3.7339,
+        "detail": ""
+      },
+      {
+        "name": "publicacao",
+        "status": "sucesso",
+        "duration_seconds": 0.0526,
+        "detail": ""
+      }
+    ],
+    "total_duration_seconds": 3.809,
+    "validation": {
+      "batch_name": "2024-04_novo_perfil",
+      "schema_name": "CreditReferenceContract",
+      "passed": true,
+      "n_rows": 8000,
+      "n_failures": 0,
+      "rejection_rate": 0.0,
+      "rules_violated": [],
+      "failures_by_rule": {},
+      "validated_at": "2026-10-19T13:33:17.891638+00:00"
+    },
+    "drift": {
+      "batch_name": "2024-04_novo_perfil",
+      "n_rows": 8000,
+      "labeled": true,
+      "summary": {
+        "n_features": 10,
+        "n_drifted": 3,
+        "drift_share": 0.3,
+        "dataset_drift": true,
+        "max_psi": 0.548898,
+        "drifted_features": [
+          "age",
+          "MonthlyIncome",
+          "DebtRatio"
+        ]
+      },
+      "performance": {
+        "roc_auc": 0.8254487167654243,
+        "pr_auc": 0.3105613323491933,
+        "ks_statistic": 0.5110430165088389,
+        "brier": 0.21465247413576927,
+        "precision": 0.15622849277357193,
+        "recall": 0.8330275229357799,
+        "f1": 0.2631121414082874,
+        "default_rate": 0.068125,
+        "approval_rate": 0.6367499999999999,
+        "approved_bad_rate": 0.017864153906556733,
+        "n_rows": 8000.0
+      },
+      "performance_delta": {
+        "roc_auc": -0.043229,
+        "pr_auc": -0.078459,
+        "ks_statistic": -0.080959,
+        "brier": 0.07829,
+        "precision": -0.067967,
+        "recall": 0.064421,
+        "f1": -0.084023,
+        "default_rate": 0.001521,
+        "approval_rate": -0.134914,
+        "approved_bad_rate": -0.002108,
+        "n_rows": -14191.0
+      },
+      "alerts": [
+        "queda_de_desempenho",
+        "drift_de_dataset",
+        "drift_de_feature"
+      ],
+      "performance_degraded": true,
+      "silent_degradation": false,
+      "psi_by_feature": {
+        "age": 0.548898,
+        "MonthlyIncome": 0.528119,
+        "DebtRatio": 0.285932,
+        "RevolvingUtilizationOfUnsecuredLines": 0.156053,
+        "NumberOfOpenCreditLinesAndLoans": 0.000711,
+        "NumberOfDependents": 0.00023,
+        "NumberRealEstateLoansOrLines": 0.00017,
+        "NumberOfTime30-59DaysPastDueNotWorse": 2e-05,
+        "NumberOfTimes90DaysLate": 0.0,
+        "NumberOfTime60-89DaysPastDueNotWorse": 0.0
+      },
+      "html_reports": {
+        "data_drift": "/root/credit-scoring-observability/reports/2024-04_novo_perfil__data_drift.html",
+        "data_summary": "/root/credit-scoring-observability/reports/2024-04_novo_perfil__data_summary.html",
+        "classification": "/root/credit-scoring-observability/reports/2024-04_novo_perfil__classification.html"
+      },
+      "evaluated_at": "2026-10-19T13:33:18.013947+00:00"
+    },
+    "mlflow_run_id": "2c60184407af4535a2e130f94a28dbc2",
+    "artifacts": [
+      "/root/credit-scoring-observability/reports/2024-04_novo_perfil__validation.json",
+      "/root/credit-scoring-observability/reports/2024-04_novo_perfil__drift.json",
+      "/root/credit-scoring-observability/reports/2024-04_novo_perfil__psi_ks.csv",
+      "/root/credit-scoring-observability/reports/2024-04_novo_perfil__data_drift.html",
+      "/root/credit-scoring-observability/reports/2024-04_novo_perfil__data_summary.html",
+      "/root/credit-scoring-observability/reports/2024-04_novo_perfil__classification.html"
+    ],
+    "started_at": "2026-10-19T13:33:17.874198+00:00",
+    "finished_at": "2026-10-19T13:33:21.717015+00:00",
+    "finished_at_epoch": 1792416801.7170193
+  },
+  {
+    "batch": "2024-05_recessao",
+    "status": "sucesso",
+    "n_rows": 8000,
+    "alerts": [
+      "degradacao_silenciosa",
+      "queda_de_desempenho"
+    ],
+    "tasks": [
+      {
+        "name": "ingestao",
+        "status": "sucesso",
+        "duration_seconds": 0.0043,
+        "detail": ""
+      },
+      {
+        "name": "validacao",
+        "status": "sucesso",
+        "duration_seconds": 0.0117,
+        "detail": ""
+      },
+      {
+        "name": "inferencia",
+        "status": "sucesso",
+        "duration_seconds": 0.0054,
+        "detail": ""
+      },
+      {
+        "name": "deteccao_drift",
+        "status": "sucesso",
+        "duration_seconds": 3.7407,
+        "detail": ""
+      },
+      {
+        "name": "publicacao",
+        "status": "sucesso",
+        "duration_seconds": 0.0485,
+        "detail": ""
+      }
+    ],
+    "total_duration_seconds": 3.8106,
+    "validation": {
+      "batch_name": "2024-05_recessao",
+      "schema_name": "CreditReferenceContract",
+      "passed": true,
+      "n_rows": 8000,
+      "n_failures": 0,
+      "rejection_rate": 0.0,
+      "rules_violated": [],
+      "failures_by_rule": {},
+      "validated_at": "2026-10-19T13:33:21.734715+00:00"
+    },
+    "drift": {
+      "batch_name": "2024-05_recessao",
+      "n_rows": 8000,
+      "labeled": true,
+      "summary": {
+        "n_features": 10,
+        "n_drifted": 0,
+        "drift_share": 0.0,
+        "dataset_drift": false,
+        "max_psi": 0.002012,
+        "drifted_features": []
+      },
+      "performance": {
+        "roc_auc": 0.8232866505221456,
+        "pr_auc": 0.4139648696379785,
+        "ks_statistic": 0.5031128308657462,
+        "brier": 0.13948124751104943,
+        "precision": 0.29764453961456105,
+        "recall": 0.6690734055354994,
+        "f1": 0.4120044460911449,
+        "default_rate": 0.103875,
+        "approval_rate": 0.7665,
+        "approved_bad_rate": 0.04484670580560991,
+        "n_rows": 8000.0
+      },
+      "performance_delta": {
+        "roc_auc": -0.045391,
+        "pr_auc": 0.024944,
+        "ks_statistic": -0.088889,
+        "brier": 0.003119,
+        "precision": 0.073449,
+        "recall": -0.099533,
+        "f1": 0.064869,
+        "default_rate": 0.037271,
+        "approval_rate": -0.005164,
+        "approved_bad_rate": 0.024875,
+        "n_rows": -14191.0
+      },
+      "alerts": [
+        "degradacao_silenciosa",
+        "queda_de_desempenho"
+      ],
+      "performance_degraded": true,
+      "silent_degradation": true,
+      "psi_by_feature": {
+        "DebtRatio": 0.002012,
+        "MonthlyIncome": 0.001479,
+        "NumberOfOpenCreditLinesAndLoans": 0.000844,
+        "age": 0.00078,
+        "RevolvingUtilizationOfUnsecuredLines": 0.000528,
+        "NumberOfDependents": 0.000464,
+        "NumberOfTime30-59DaysPastDueNotWorse": 9.1e-05,
+        "NumberRealEstateLoansOrLines": 2.6e-05,
+        "NumberOfTimes90DaysLate": 0.0,
+        "NumberOfTime60-89DaysPastDueNotWorse": 0.0
+      },
+      "html_reports": {
+        "data_drift": "/root/credit-scoring-observability/reports/2024-05_recessao__data_drift.html",
+        "data_summary": "/root/credit-scoring-observability/reports/2024-05_recessao__data_summary.html",
+        "classification": "/root/credit-scoring-observability/reports/2024-05_recessao__classification.html"
+      },
+      "evaluated_at": "2026-10-19T13:33:21.855643+00:00"
+    },
+    "mlflow_run_id": "932fb3c28c73492db98fb6ce70213c8a",
+    "artifacts": [
+      "/root/credit-scoring-observability/reports/2024-05_recessao__validation.json",
+      "/root/credit-scoring-observability/reports/2024-05_recessao__drift.json",
+      "/root/credit-scoring-observability/reports/2024-05_recessao__psi_ks.csv",
+      "/root/credit-scoring-observability/reports/2024-05_recessao__data_drift.html",
+      "/root/credit-scoring-observability/reports/2024-05_recessao__data_summary.html",
+      "/root/credit-scoring-observability/reports/2024-05_recessao__classification.html"
+    ],
+    "started_at": "2026-10-19T13:33:21.718418+00:00",
+    "finished_at": "2026-10-19T13:33:25.567193+00:00",
+    "finished_at_epoch": 1792416805.5671973
+  }
+]

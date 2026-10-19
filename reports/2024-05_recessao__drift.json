@@ -1,0 +1,63 @@
+{
+  "batch_name": "2024-05_recessao",
+  "n_rows": 8000,
+  "labeled": true,
+  "summary": {
+    "n_features": 10,
+    "n_drifted": 0,
+    "drift_share": 0.0,
+    "dataset_drift": false,
+    "max_psi": 0.002012,
+    "drifted_features": []
+  },
+  "performance": {
+    "roc_auc": 0.8232866505221456,
+    "pr_auc": 0.4139648696379785,
+    "ks_statistic": 0.5031128308657462,
+    "brier": 0.13948124751104943,
+    "precision": 0.29764453961456105,
+    "recall": 0.6690734055354994,
+    "f1": 0.4120044460911449,
+    "default_rate": 0.103875,
+    "approval_rate": 0.7665,
+    "approved_bad_rate": 0.04484670580560991,
+    "n_rows": 8000.0
+  },
+  "performance_delta": {
+    "roc_auc": -0.045391,
+    "pr_auc": 0.024944,
+    "ks_statistic": -0.088889,
+    "brier": 0.003119,
+    "precision": 0.073449,
+    "recall": -0.099533,
+    "f1": 0.064869,
+    "default_rate": 0.037271,
+    "approval_rate": -0.005164,
+    "approved_bad_rate": 0.024875,
+    "n_rows": -14191.0
+  },
+  "alerts": [
+    "degradacao_silenciosa",
+    "queda_de_desempenho"
+  ],
+  "performance_degraded": true,
+  "silent_degradation": true,
+  "psi_by_feature": {
+    "DebtRatio": 0.002012,
+    "MonthlyIncome": 0.001479,
+    "NumberOfOpenCreditLinesAndLoans": 0.000844,
+    "age": 0.00078,
+    "RevolvingUtilizationOfUnsecuredLines": 0.000528,
+    "NumberOfDependents": 0.000464,
+    "NumberOfTime30-59DaysPastDueNotWorse": 9.1e-05,
+    "NumberRealEstateLoansOrLines": 2.6e-05,
+    "NumberOfTimes90DaysLate": 0.0,
+    "NumberOfTime60-89DaysPastDueNotWorse": 0.0
+  },
+  "html_reports": {
+    "data_drift": "/root/credit-scoring-observability/reports/2024-05_recessao__data_drift.html",
+    "data_summary": "/root/credit-scoring-observability/reports/2024-05_recessao__data_summary.html",
+    "classification": "/root/credit-scoring-observability/reports/2024-05_recessao__classification.html"
+  },
+  "evaluated_at": "2026-10-19T13:33:21.855643+00:00"
+}

@@ -1,0 +1,41 @@
+{
+  "batch_name": "lote_corrompido",
+  "schema_name": "CreditReferenceContract",
+  "passed": false,
+  "n_rows": 530,
+  "n_failures": 167,
+  "rejection_rate": 0.254717,
+  "rules_violated": [
+    "CreditReferenceContract:column_in_schema",
+    "CreditReferenceContract:o lote contém linhas duplicadas",
+    "DebtRatio:less_than_or_equal_to(10.0)",
+    "MonthlyIncome:greater_than_or_equal_to(0.0)",
+    "MonthlyIncome:not_nullable",
+    "NumberOfDependents:coerce_dtype('int64')",
+    "NumberOfDependents:dtype('int64')",
+    "NumberOfDependents:not_nullable",
+    "NumberOfTime30-59DaysPastDueNotWorse:less_than_or_equal_to(20)",
+    "NumberOfTimes90DaysLate:less_than_or_equal_to(20)",
+    "RevolvingUtilizationOfUnsecuredLines:less_than_or_equal_to(10.0)",
+    "SeriousDlqin2yrs:isin([0, 1])",
+    "age:greater_than_or_equal_to(18)",
+    "age:less_than_or_equal_to(100)"
+  ],
+  "failures_by_rule": {
+    "CreditReferenceContract:column_in_schema": 1,
+    "CreditReferenceContract:o lote contém linhas duplicadas": 1,
+    "NumberOfDependents:coerce_dtype('int64')": 15,
+    "RevolvingUtilizationOfUnsecuredLines:less_than_or_equal_to(10.0)": 10,
+    "age:greater_than_or_equal_to(18)": 15,
+    "age:less_than_or_equal_to(100)": 5,
+    "NumberOfTime30-59DaysPastDueNotWorse:less_than_or_equal_to(20)": 10,
+    "DebtRatio:less_than_or_equal_to(10.0)": 10,
+    "MonthlyIncome:not_nullable": 40,
+    "MonthlyIncome:greater_than_or_equal_to(0.0)": 10,
+    "NumberOfTimes90DaysLate:less_than_or_equal_to(20)": 10,
+    "NumberOfDependents:not_nullable": 15,
+    "NumberOfDependents:dtype('int64')": 15,
+    "SeriousDlqin2yrs:isin([0, 1])": 10
+  },
+  "validated_at": "2026-10-19T13:33:04.684165+00:00"
+}

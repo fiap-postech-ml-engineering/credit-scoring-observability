@@ -1,0 +1,61 @@
+{
+  "conditions": [
+    {
+      "name": "controle",
+      "description": "Nenhum mecanismo ligado — mede só o ruído amostral.",
+      "data_drift": false,
+      "concept_drift": false,
+      "roc_auc": 0.8691,
+      "auc_delta": 0.0005,
+      "approved_bad_rate": 0.0194,
+      "default_rate": 0.0669,
+      "max_psi": 0.002,
+      "n_drifted_features": 0
+    },
+    {
+      "name": "so_data_drift",
+      "description": "Só as features mudam (inflação, endividamento, idade). P(Y|X) intacta.",
+      "data_drift": true,
+      "concept_drift": false,
+      "roc_auc": 0.8398,
+      "auc_delta": -0.0289,
+      "approved_bad_rate": 0.0166,
+      "default_rate": 0.0669,
+      "max_psi": 0.5613,
+      "n_drifted_features": 3
+    },
+    {
+      "name": "so_concept_drift",
+      "description": "Features idênticas à referência; só a relação com a inadimplência muda.",
+      "data_drift": false,
+      "concept_drift": true,
+      "roc_auc": 0.8193,
+      "auc_delta": -0.0494,
+      "approved_bad_rate": 0.0466,
+      "default_rate": 0.1047,
+      "max_psi": 0.002,
+      "n_drifted_features": 0
+    },
+    {
+      "name": "ambos",
+      "description": "Os dois mecanismos simultâneos — o cenário real de uma recessão.",
+      "data_drift": true,
+      "concept_drift": true,
+      "roc_auc": 0.7196,
+      "auc_delta": -0.149,
+      "approved_bad_rate": 0.1002,
+      "default_rate": 0.1746,
+      "max_psi": 0.5613,
+      "n_drifted_features": 3
+    }
+  ],
+  "decomposition": {
+    "ruido_amostral": 0.0005,
+    "efeito_data_drift": -0.0294,
+    "efeito_concept_drift": -0.0499,
+    "efeito_conjunto": -0.1495,
+    "interacao": -0.0702,
+    "share_data_drift": 0.3707,
+    "share_concept_drift": 0.6293
+  }
+}

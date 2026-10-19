@@ -1,0 +1,60 @@
+{
+  "batch_name": "2024-02_inflacao_leve",
+  "n_rows": 8000,
+  "labeled": true,
+  "summary": {
+    "n_features": 10,
+    "n_drifted": 0,
+    "drift_share": 0.0,
+    "dataset_drift": false,
+    "max_psi": 0.055324,
+    "drifted_features": []
+  },
+  "performance": {
+    "roc_auc": 0.8618803523964441,
+    "pr_auc": 0.39345458934749217,
+    "ks_statistic": 0.5760463885774874,
+    "brier": 0.1372441419241049,
+    "precision": 0.21451787648970747,
+    "recall": 0.7659574468085106,
+    "f1": 0.3351671603893356,
+    "default_rate": 0.064625,
+    "approval_rate": 0.76925,
+    "approved_bad_rate": 0.019662008449788757,
+    "n_rows": 8000.0
+  },
+  "performance_delta": {
+    "roc_auc": -0.006797,
+    "pr_auc": 0.004434,
+    "ks_statistic": -0.015956,
+    "brier": 0.000882,
+    "precision": -0.009678,
+    "recall": -0.002649,
+    "f1": -0.011968,
+    "default_rate": -0.001979,
+    "approval_rate": -0.002414,
+    "approved_bad_rate": -0.00031,
+    "n_rows": -14191.0
+  },
+  "alerts": [],
+  "performance_degraded": false,
+  "silent_degradation": false,
+  "psi_by_feature": {
+    "MonthlyIncome": 0.055324,
+    "NumberOfOpenCreditLinesAndLoans": 0.002217,
+    "DebtRatio": 0.001324,
+    "RevolvingUtilizationOfUnsecuredLines": 0.001126,
+    "age": 0.000874,
+    "NumberOfDependents": 0.000477,
+    "NumberRealEstateLoansOrLines": 4.7e-05,
+    "NumberOfTime30-59DaysPastDueNotWorse": 8e-06,
+    "NumberOfTimes90DaysLate": 0.0,
+    "NumberOfTime60-89DaysPastDueNotWorse": 0.0
+  },
+  "html_reports": {
+    "data_drift": "/root/credit-scoring-observability/reports/2024-02_inflacao_leve__data_drift.html",
+    "data_summary": "/root/credit-scoring-observability/reports/2024-02_inflacao_leve__data_summary.html",
+    "classification": "/root/credit-scoring-observability/reports/2024-02_inflacao_leve__classification.html"
+  },
+  "evaluated_at": "2026-10-19T13:33:10.028567+00:00"
+}

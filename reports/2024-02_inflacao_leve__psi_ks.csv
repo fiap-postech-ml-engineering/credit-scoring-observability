@@ -1,0 +1,11 @@
+feature,psi,ks_statistic,ks_p_value,reference_mean,current_mean,mean_shift_pct,severity,drifted
+MonthlyIncome,0.055324,0.127901,4.024526014654983e-105,6451.126,6980.3547,8.2,estavel,False
+NumberOfOpenCreditLinesAndLoans,0.002217,0.010556,0.38419777153914925,8.5249,8.4386,-1.01,estavel,False
+DebtRatio,0.001324,0.014332,0.09716462722717845,2.228,2.2118,-0.73,estavel,False
+RevolvingUtilizationOfUnsecuredLines,0.001126,0.011373,0.2963476903504928,0.3371,0.3286,-2.53,estavel,False
+age,0.000874,0.011303,0.3032241783039812,52.2586,52.0416,-0.42,estavel,False
+NumberOfDependents,0.000477,0.010498,0.3909537468056171,0.746,0.7694,3.14,estavel,False
+NumberRealEstateLoansOrLines,4.7e-05,0.004714,0.9965579031381909,1.0277,1.0136,-1.37,estavel,False
+NumberOfTime30-59DaysPastDueNotWorse,8e-06,0.001012,1.0,0.2479,0.2509,1.22,estavel,False
+NumberOfTimes90DaysLate,0.0,0.001803,1.0,0.0914,0.0897,-1.8,estavel,False
+NumberOfTime60-89DaysPastDueNotWorse,0.0,0.001981,1.0,0.065,0.0689,5.92,estavel,False

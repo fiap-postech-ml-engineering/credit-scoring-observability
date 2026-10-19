@@ -1,0 +1,11 @@
+{
+  "batch_name": "2024-01_estavel",
+  "schema_name": "CreditReferenceContract",
+  "passed": true,
+  "n_rows": 8000,
+  "n_failures": 0,
+  "rejection_rate": 0.0,
+  "rules_violated": [],
+  "failures_by_rule": {},
+  "validated_at": "2026-10-19T13:33:04.916590+00:00"
+}

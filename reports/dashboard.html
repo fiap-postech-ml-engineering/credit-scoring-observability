@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Observabilidade de Credit Scoring</title>
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7;
+  --surface-1: #fcfcfb;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #898781;
+  --grid: #e1e0d9;
+  --axis: #c3c2b7;
+  --border: rgba(11, 11, 11, 0.10);
+  --series-1: #2a78d6;
+  --good: #0ca30c;
+  --warning: #fab219;
+  --serious: #ec835a;
+  --critical: #d03b3b;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface-1: #1a1a19;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #898781;
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --border: rgba(255, 255, 255, 0.10);
+    --series-1: #3987e5;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d;
+  --surface-1: #1a1a19;
+  --text-primary: #ffffff;
+  --text-secondary: #c3c2b7;
+  --text-muted: #898781;
+  --grid: #2c2c2a;
+  --axis: #383835;
+  --border: rgba(255, 255, 255, 0.10);
+  --series-1: #3987e5;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 0 16px 64px;
+  background: var(--page);
+  color: var(--text-primary);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.5;
+}
+.wrap { max-width: 1120px; margin: 0 auto; }
+header { padding: 40px 0 8px; }
+h1 { font-size: clamp(1.5rem, 4vw, 2rem); margin: 0 0 8px; letter-spacing: -0.02em; }
+.subtitle { color: var(--text-secondary); margin: 0 0 4px; max-width: 70ch; }
+.meta { color: var(--text-muted); font-size: 0.8125rem; margin: 8px 0 0; }
+
+section {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 24px 0;
+  overflow-x: auto;
+}
+h2 { font-size: 1.0625rem; margin: 0 0 4px; }
+.hint { color: var(--text-secondary); font-size: 0.875rem; margin: 0 0 20px; max-width: 78ch; }
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+  margin: 24px 0;
+}
+.kpi {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+}
+.kpi-label { color: var(--text-secondary); font-size: 0.8125rem; margin: 0 0 6px; }
+.kpi-value { font-size: 1.875rem; font-weight: 600; letter-spacing: -0.02em; }
+.kpi-detail { color: var(--text-muted); font-size: 0.75rem; margin: 4px 0 0; }
+.kpi[data-status="good"] { border-left: 3px solid var(--good); }
+.kpi[data-status="warning"] { border-left: 3px solid var(--warning); }
+.kpi[data-status="serious"] { border-left: 3px solid var(--serious); }
+.kpi[data-status="critical"] { border-left: 3px solid var(--critical); }
+
+.chart { display: block; min-width: 680px; }
+.chart--bars { min-width: 820px; }
+.axis-label { font-size: 11px; fill: var(--text-secondary); }
+.axis-sub { font-size: 10px; fill: var(--text-muted); }
+.axis-tick { font-size: 10px; fill: var(--text-muted); font-variant-numeric: tabular-nums; }
+.cell-value { font-size: 11px; font-variant-numeric: tabular-nums; }
+.bar-value { font-size: 11px; fill: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.point-value { font-size: 11px; fill: var(--text-primary); font-weight: 600; font-variant-numeric: tabular-nums; }
+.grid { stroke: var(--grid); stroke-width: 1; }
+.axis { stroke: var(--axis); stroke-width: 1; }
+.threshold { stroke: var(--critical); stroke-width: 1.5; stroke-dasharray: 5 4; }
+.threshold-label { font-size: 10px; fill: var(--critical); }
+.baseline-ref { stroke: var(--axis); stroke-width: 1.5; stroke-dasharray: 2 3; }
+.baseline-label { font-size: 10px; fill: var(--text-muted); }
+.series-line { fill: none; stroke: var(--series-1); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.marker-halo { fill: var(--surface-1); }
+.marker-dot { fill: var(--series-1); }
+.cell, .marker, .bar-row { cursor: default; }
+.cell:hover rect, .bar-row:hover rect { stroke: var(--text-primary); stroke-width: 2; }
+.marker:hover .marker-dot { r: 7; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 16px; margin: 16px 0 0; font-size: 0.8125rem; color: var(--text-secondary); }
+.legend-item { display: inline-flex; align-items: center; gap: 7px; }
+.swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.ramp { display: inline-flex; height: 12px; border-radius: 3px; overflow: hidden; }
+.ramp span { width: 18px; }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 0.75rem; padding: 3px 9px; border-radius: 999px;
+  border: 1px solid var(--border); white-space: nowrap; margin: 2px 3px 2px 0;
+}
+.badge--good { background: color-mix(in srgb, var(--good) 14%, transparent); }
+.badge--warning { background: color-mix(in srgb, var(--warning) 20%, transparent); }
+.badge--serious { background: color-mix(in srgb, var(--serious) 20%, transparent); }
+.badge--critical { background: color-mix(in srgb, var(--critical) 18%, transparent); }
+
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; min-width: 760px; }
+.data-table th, .data-table td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.data-table thead th { color: var(--text-secondary); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.data-table tbody th { font-weight: 600; white-space: nowrap; }
+.data-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.cell-empty { color: var(--text-muted); }
+.status { white-space: nowrap; }
+.status .duration { color: var(--text-muted); font-size: 0.6875rem; margin-left: 6px; font-variant-numeric: tabular-nums; }
+.status--good { color: var(--good); }
+.status--critical { color: var(--critical); }
+.status--serious { color: var(--serious); }
+.empty { color: var(--text-muted); font-size: 0.875rem; margin: 0; }
+.links { display: flex; flex-wrap: wrap; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.links a { font-size: 0.8125rem; color: var(--series-1); text-decoration: none; border: 1px solid var(--border); border-radius: 8px; padding: 6px 11px; }
+.links a:hover { text-decoration: underline; }
+.callout { border-left: 3px solid var(--critical); padding: 4px 0 4px 16px; margin: 20px 0 0; color: var(--text-secondary); font-size: 0.875rem; }
+.callout strong { color: var(--text-primary); }
+@media print { section { break-inside: avoid; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Observabilidade de Credit Scoring</h1>
+  <p class="subtitle">Saúde do contrato de dados, do pipeline e do modelo ao longo de
+  cinco lotes mensais de produção — do mês estável à recessão.</p>
+  <p class="meta">Gerado em 19/10/2026 13:33 UTC · modelo <code>xgboost</code>
+  · baseline ROC AUC 0,8687 · limiar de PSI 0,25
+  · limiar de queda de AUC 0,03</p>
+</header>
+
+<div class="kpis"><div class="kpi" data-status=""><p class="kpi-label">Lotes monitorados</p><div class="kpi-value">5</div><p class="kpi-detail">5 execuções do pipeline</p></div><div class="kpi" data-status="critical"><p class="kpi-label">Lotes com alerta</p><div class="kpi-value">3</div><p class="kpi-detail">de 5 lotes processados</p></div><div class="kpi" data-status="warning"><p class="kpi-label">Maior PSI observado</p><div class="kpi-value">0,549</div><p class="kpi-detail">limiar de alerta: 0,25</p></div><div class="kpi" data-status="serious"><p class="kpi-label">Pior queda de ROC AUC</p><div class="kpi-value">-0,0454</div><p class="kpi-detail">limiar: −0,03</p></div><div class="kpi" data-status="critical"><p class="kpi-label">Inadimplência na carteira aprovada</p><div class="kpi-value">4,48%</div><p class="kpi-detail">2,25× a baseline (2,00%)</p></div></div>
+
+<p class="callout"><strong>Degradação silenciosa detectada em 2024-05_recessao.</strong> O desempenho caiu além do limiar e <em>nenhuma</em> feature acusou drift — assinatura de concept drift. Monitoramento só de distribuição de dados não teria visto nada.</p>
+
+<section>
+  <h2>Drift por feature e por lote (PSI)</h2>
+  <p class="hint">Mais escuro, mais drift. O valor vai impresso em cada célula, então a
+  leitura não depende de distinguir tons. Compare a última coluna com as duas anteriores:
+  na recessão o PSI praticamente não se move — e é justamente o lote mais caro.</p>
+  <svg viewBox="0 0 866 414" width="100%" role="img" aria-label="Heatmap do Population Stability Index por feature e por lote" class="chart chart--heatmap"><text x="352.0" y="18" class="axis-label" text-anchor="middle">2024-01</text><text x="352.0" y="32" class="axis-sub" text-anchor="middle">estavel</text><text x="466.0" y="18" class="axis-label" text-anchor="middle">2024-02</text><text x="466.0" y="32" class="axis-sub" text-anchor="middle">inflacao leve</text><text x="580.0" y="18" class="axis-label" text-anchor="middle">2024-03</text><text x="580.0" y="32" class="axis-sub" text-anchor="middle">inflacao forte</text><text x="694.0" y="18" class="axis-label" text-anchor="middle">2024-04</text><text x="694.0" y="32" class="axis-sub" text-anchor="middle">novo perfil</text><text x="808.0" y="18" class="axis-label" text-anchor="middle">2024-05</text><text x="808.0" y="32" class="axis-sub" text-anchor="middle">recessao</text><text x="284" y="67.0" class="axis-label" text-anchor="end">RevolvingUtilizationOfUnsecuredLines</text><g class="cell" data-severity="estavel"><title>RevolvingUtilizationOfUnsecuredLines — 2024-01_estavel: PSI 0,001 (estavel)</title><rect x="296" y="46" width="112" height="34" rx="4" fill="#cde2fb"/><text x="352.0" y="67.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,001</text></g><g class="cell" data-severity="estavel"><title>RevolvingUtilizationOfUnsecuredLines — 2024-02_inflacao_leve: PSI 0,001 (estavel)</title><rect x="410" y="46" width="112" height="34" rx="4" fill="#cde2fb"/><text x="466.0" y="67.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,001</text></g><g class="cell" data-severity="atencao"><title>RevolvingUtilizationOfUnsecuredLines — 2024-03_inflacao_forte: PSI 0,132 (atencao)</title><rect x="524" y="46" width="112" height="34" rx="4" fill="#86b6ef"/><text x="580.0" y="67.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,132</text></g><g class="cell" data-severity="atencao"><title>RevolvingUtilizationOfUnsecuredLines — 2024-04_novo_perfil: PSI 0,156 (atencao)</title><rect x="638" y="46" width="112" height="34" rx="4" fill="#86b6ef"/><text x="694.0" y="67.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,156</text></g><g class="cell" data-severity="estavel"><title>RevolvingUtilizationOfUnsecuredLines — 2024-05_recessao: PSI 0,001 (estavel)</title><rect x="752" y="46" width="112" height="34" rx="4" fill="#cde2fb"/><text x="808.0" y="67.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,001</text></g><text x="284" y="103.0" class="axis-label" text-anchor="end">age</text><g class="cell" data-severity="estavel"><title>age — 2024-01_estavel: PSI 0,001 (estavel)</title><rect x="296" y="82" width="112" height="34" rx="4" fill="#cde2fb"/><text x="352.0" y="103.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,001</text></g><g class="cell" data-severity="estavel"><title>age — 2024-02_inflacao_leve: PSI 0,001 (estavel)</title><rect x="410" y="82" width="112" height="34" rx="4" fill="#cde2fb"/><text x="466.0" y="103.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,001</text></g><g class="cell" data-severity="estavel"><title>age — 2024-03_inflacao_forte: PSI 0,001 (estavel)</title><rect x="524" y="82" width="112" height="34" rx="4" fill="#cde2fb"/><text x="580.0" y="103.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,001</text></g><g class="cell" data-severity="drift"><title>age — 2024-04_novo_perfil: PSI 0,549 (drift)</title><rect x="638" y="82" width="112" height="34" rx="4" fill="#0d366b"/><text x="694.0" y="103.0" text-anchor="middle" class="cell-value" fill="#ffffff">0,549</text></g><g class="cell" data-severity="estavel"><title>age — 2024-05_recessao: PSI 0,001 (estavel)</title><rect x="752" y="82" width="112" height="34" rx="4" fill="#cde2fb"/><text x="808.0" y="103.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,001</text></g><text x="284" y="139.0" class="axis-label" text-anchor="end">NumberOfTime30-59DaysPastDueNotWorse</text><g class="cell" data-severity="estavel"><title>NumberOfTime30-59DaysPastDueNotWorse — 2024-01_estavel: PSI 0,000 (estavel)</title><rect x="296" y="118" width="112" height="34" rx="4" fill="#cde2fb"/><text x="352.0" y="139.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,000</text></g><g class="cell" data-severity="estavel"><title>NumberOfTime30-59DaysPastDueNotWorse — 2024-02_inflacao_leve: PSI 0,000 (estavel)</title><rect x="410" y="118" width="112" height="34" rx="4" fill="#cde2fb"/><text x="466.0" y="139.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,000</text></g><g class="cell" data-severity="estavel"><title>NumberOfTime30-59DaysPastDueNotWorse — 2024-03_inflacao_forte: PSI 0,000 (estavel)</title><rect x="524" y="118" width="112" height="34" rx="4" fill="#cde2fb"/><text x="580.0" y="139.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,000</text></g><g class="cell" data-severity="estavel"><title>NumberOfTime30-59DaysPastDueNotWorse — 2024-04_novo_perfil: PSI 0,000 (estavel)</title><rect x="638" y="118" width="112" height="34" rx="4" fill="#cde2fb"/><text x="694.0" y="139.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,000</text></g><g class="cell" data-severity="estavel"><title>NumberOfTime30-59DaysPastDueNotWorse — 2024-05_recessao: PSI 0,000 (estavel)</title><rect x="752" y="118" width="112" height="34" rx="4" fill="#cde2fb"/><text x="808.0" y="139.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,000</text></g><text x="284" y="175.0" class="axis-label" text-anchor="end">DebtRatio</text><g class="cell" data-severity="estavel"><title>DebtRatio — 2024-01_estavel: PSI 0,001 (estavel)</title><rect x="296" y="154" width="112" height="34" rx="4" fill="#cde2fb"/><text x="352.0" y="175.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,001</text></g><g class="cell" data-severity="estavel"><title>DebtRatio — 2024-02_inflacao_leve: PSI 0,001 (estavel)</title><rect x="410" y="154" width="112" height="34" rx="4" fill="#cde2fb"/><text x="466.0" y="175.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,001</text></g><g class="cell" data-severity="drift"><title>DebtRatio — 2024-03_inflacao_forte: PSI 0,261 (drift)</title><rect x="524" y="154" width="112" height="34" rx="4" fill="#3987e5"/><text x="580.0" y="175.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,261</text></g><g class="cell" data-severity="drift"><title>DebtRatio — 2024-04_novo_perfil: PSI 0,286 (drift)</title><rect x="638" y="154" width="112" height="34" rx="4" fill="#3987e5"/><text x="694.0" y="175.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,286</text></g><g class="cell" data-severity="estavel"><title>DebtRatio — 2024-05_recessao: PSI 0,002 (estavel)</title><rect x="752" y="154" width="112" height="34" rx="4" fill="#cde2fb"/><text x="808.0" y="175.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,002</text></g><text x="284" y="211.0" class="axis-label" text-anchor="end">MonthlyIncome</text><g class="cell" data-severity="estavel"><title>MonthlyIncome — 2024-01_estavel: PSI 0,002 (estavel)</title><rect x="296" y="190" width="112" height="34" rx="4" fill="#cde2fb"/><text x="352.0" y="211.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,002</text></g><g class="cell" data-severity="estavel"><title>MonthlyIncome — 2024-02_inflacao_leve: PSI 0,055 (estavel)</title><rect x="410" y="190" width="112" height="34" rx="4" fill="#b7d3f6"/><text x="466.0" y="211.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,055</text></g><g class="cell" data-severity="drift"><title>MonthlyIncome — 2024-03_inflacao_forte: PSI 0,467 (drift)</title><rect x="524" y="190" width="112" height="34" rx="4" fill="#184f95"/><text x="580.0" y="211.0" text-anchor="middle" class="cell-value" fill="#ffffff">0,467</text></g><g class="cell" data-severity="drift"><title>MonthlyIncome — 2024-04_novo_perfil: PSI 0,528 (drift)</title><rect x="638" y="190" width="112" height="34" rx="4" fill="#0d366b"/><text x="694.0" y="211.0" text-anchor="middle" class="cell-value" fill="#ffffff">0,528</text></g><g class="cell" data-severity="estavel"><title>MonthlyIncome — 2024-05_recessao: PSI 0,001 (estavel)</title><rect x="752" y="190" width="112" height="34" rx="4" fill="#cde2fb"/><text x="808.0" y="211.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,001</text></g><text x="284" y="247.0" class="axis-label" text-anchor="end">NumberOfOpenCreditLinesAndLoans</text><g class="cell" data-severity="estavel"><title>NumberOfOpenCreditLinesAndLoans — 2024-01_estavel: PSI 0,001 (estavel)</title><rect x="296" y="226" width="112" height="34" rx="4" fill="#cde2fb"/><text x="352.0" y="247.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,001</text></g><g class="cell" data-severity="estavel"><title>NumberOfOpenCreditLinesAndLoans — 2024-02_inflacao_leve: PSI 0,002 (estavel)</title><rect x="410" y="226" width="112" height="34" rx="4" fill="#cde2fb"/><text x="466.0" y="247.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,002</text></g><g class="cell" data-severity="estavel"><title>NumberOfOpenCreditLinesAndLoans — 2024-03_inflacao_forte: PSI 0,001 (estavel)</title><rect x="524" y="226" width="112" height="34" rx="4" fill="#cde2fb"/><text x="580.0" y="247.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,001</text></g><g class="cell" data-severity="estavel"><title>NumberOfOpenCreditLinesAndLoans — 2024-04_novo_perfil: PSI 0,001 (estavel)</title><rect x="638" y="226" width="112" height="34" rx="4" fill="#cde2fb"/><text x="694.0" y="247.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,001</text></g><g class="cell" data-severity="estavel"><title>NumberOfOpenCreditLinesAndLoans — 2024-05_recessao: PSI 0,001 (estavel)</title><rect x="752" y="226" width="112" height="34" rx="4" fill="#cde2fb"/><text x="808.0" y="247.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,001</text></g><text x="284" y="283.0" class="axis-label" text-anchor="end">NumberOfTimes90DaysLate</text><g class="cell" data-severity="estavel"><title>NumberOfTimes90DaysLate — 2024-01_estavel: PSI 0,000 (estavel)</title><rect x="296" y="262" width="112" height="34" rx="4" fill="#cde2fb"/><text x="352.0" y="283.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,000</text></g><g class="cell" data-severity="estavel"><title>NumberOfTimes90DaysLate — 2024-02_inflacao_leve: PSI 0,000 (estavel)</title><rect x="410" y="262" width="112" height="34" rx="4" fill="#cde2fb"/><text x="466.0" y="283.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,000</text></g><g class="cell" data-severity="estavel"><title>NumberOfTimes90DaysLate — 2024-03_inflacao_forte: PSI 0,000 (estavel)</title><rect x="524" y="262" width="112" height="34" rx="4" fill="#cde2fb"/><text x="580.0" y="283.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,000</text></g><g class="cell" data-severity="estavel"><title>NumberOfTimes90DaysLate — 2024-04_novo_perfil: PSI 0,000 (estavel)</title><rect x="638" y="262" width="112" height="34" rx="4" fill="#cde2fb"/><text x="694.0" y="283.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,000</text></g><g class="cell" data-severity="estavel"><title>NumberOfTimes90DaysLate — 2024-05_recessao: PSI 0,000 (estavel)</title><rect x="752" y="262" width="112" height="34" rx="4" fill="#cde2fb"/><text x="808.0" y="283.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,000</text></g><text x="284" y="319.0" class="axis-label" text-anchor="end">NumberRealEstateLoansOrLines</text><g class="cell" data-severity="estavel"><title>NumberRealEstateLoansOrLines — 2024-01_estavel: PSI 0,000 (estavel)</title><rect x="296" y="298" width="112" height="34" rx="4" fill="#cde2fb"/><text x="352.0" y="319.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,000</text></g><g class="cell" data-severity="estavel"><title>NumberRealEstateLoansOrLines — 2024-02_inflacao_leve: PSI 0,000 (estavel)</title><rect x="410" y="298" width="112" height="34" rx="4" fill="#cde2fb"/><text x="466.0" y="319.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,000</text></g><g class="cell" data-severity="estavel"><title>NumberRealEstateLoansOrLines — 2024-03_inflacao_forte: PSI 0,000 (estavel)</title><rect x="524" y="298" width="112" height="34" rx="4" fill="#cde2fb"/><text x="580.0" y="319.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,000</text></g><g class="cell" data-severity="estavel"><title>NumberRealEstateLoansOrLines — 2024-04_novo_perfil: PSI 0,000 (estavel)</title><rect x="638" y="298" width="112" height="34" rx="4" fill="#cde2fb"/><text x="694.0" y="319.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,000</text></g><g class="cell" data-severity="estavel"><title>NumberRealEstateLoansOrLines — 2024-05_recessao: PSI 0,000 (estavel)</title><rect x="752" y="298" width="112" height="34" rx="4" fill="#cde2fb"/><text x="808.0" y="319.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,000</text></g><text x="284" y="355.0" class="axis-label" text-anchor="end">NumberOfTime60-89DaysPastDueNotWorse</text><g class="cell" data-severity="estavel"><title>NumberOfTime60-89DaysPastDueNotWorse — 2024-01_estavel: PSI 0,000 (estavel)</title><rect x="296" y="334" width="112" height="34" rx="4" fill="#cde2fb"/><text x="352.0" y="355.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,000</text></g><g class="cell" data-severity="estavel"><title>NumberOfTime60-89DaysPastDueNotWorse — 2024-02_inflacao_leve: PSI 0,000 (estavel)</title><rect x="410" y="334" width="112" height="34" rx="4" fill="#cde2fb"/><text x="466.0" y="355.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,000</text></g><g class="cell" data-severity="estavel"><title>NumberOfTime60-89DaysPastDueNotWorse — 2024-03_inflacao_forte: PSI 0,000 (estavel)</title><rect x="524" y="334" width="112" height="34" rx="4" fill="#cde2fb"/><text x="580.0" y="355.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,000</text></g><g class="cell" data-severity="estavel"><title>NumberOfTime60-89DaysPastDueNotWorse — 2024-04_novo_perfil: PSI 0,000 (estavel)</title><rect x="638" y="334" width="112" height="34" rx="4" fill="#cde2fb"/><text x="694.0" y="355.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,000</text></g><g class="cell" data-severity="estavel"><title>NumberOfTime60-89DaysPastDueNotWorse — 2024-05_recessao: PSI 0,000 (estavel)</title><rect x="752" y="334" width="112" height="34" rx="4" fill="#cde2fb"/><text x="808.0" y="355.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,000</text></g><text x="284" y="391.0" class="axis-label" text-anchor="end">NumberOfDependents</text><g class="cell" data-severity="estavel"><title>NumberOfDependents — 2024-01_estavel: PSI 0,000 (estavel)</title><rect x="296" y="370" width="112" height="34" rx="4" fill="#cde2fb"/><text x="352.0" y="391.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,000</text></g><g class="cell" data-severity="estavel"><title>NumberOfDependents — 2024-02_inflacao_leve: PSI 0,000 (estavel)</title><rect x="410" y="370" width="112" height="34" rx="4" fill="#cde2fb"/><text x="466.0" y="391.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,000</text></g><g class="cell" data-severity="estavel"><title>NumberOfDependents — 2024-03_inflacao_forte: PSI 0,000 (estavel)</title><rect x="524" y="370" width="112" height="34" rx="4" fill="#cde2fb"/><text x="580.0" y="391.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,000</text></g><g class="cell" data-severity="estavel"><title>NumberOfDependents — 2024-04_novo_perfil: PSI 0,000 (estavel)</title><rect x="638" y="370" width="112" height="34" rx="4" fill="#cde2fb"/><text x="694.0" y="391.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,000</text></g><g class="cell" data-severity="estavel"><title>NumberOfDependents — 2024-05_recessao: PSI 0,000 (estavel)</title><rect x="752" y="370" width="112" height="34" rx="4" fill="#cde2fb"/><text x="808.0" y="391.0" text-anchor="middle" class="cell-value" fill="#0b0b0b">0,000</text></g></svg>
+  <div class="legend">
+    <span class="legend-item">PSI <span class="ramp"><span style="background:#cde2fb"></span><span style="background:#9ec5f4"></span><span style="background:#6da7ec"></span><span style="background:#3987e5"></span><span style="background:#256abf"></span><span style="background:#184f95"></span><span style="background:#0d366b"></span></span> maior</span>
+    <span class="legend-item">estável &lt; 0,10</span>
+    <span class="legend-item">atenção 0,10–0,25</span>
+    <span class="legend-item">drift &gt; 0,25</span>
+  </div>
+</section>
+
+<section>
+  <h2>Poder discriminante do modelo (ROC AUC)</h2>
+  <p class="hint">Uma série — o AUC medido em cada lote de produção. A linha pontilhada
+  cinza é a baseline de validação; a vermelha é o limiar de alerta
+  (−0,03).</p>
+  <svg viewBox="0 0 760 300" width="100%" role="img" aria-label="ROC AUC por lote de produção, comparado com baseline de validação" class="chart chart--line"><line x1="64" y1="238.0" x2="736" y2="238.0" class="grid"/><text x="54" y="242.0" class="axis-tick" text-anchor="end">0,818</text><line x1="64" y1="184.5" x2="736" y2="184.5" class="grid"/><text x="54" y="188.5" class="axis-tick" text-anchor="end">0,832</text><line x1="64" y1="131.0" x2="736" y2="131.0" class="grid"/><text x="54" y="135.0" class="axis-tick" text-anchor="end">0,847</text><line x1="64" y1="77.5" x2="736" y2="77.5" class="grid"/><text x="54" y="81.5" class="axis-tick" text-anchor="end">0,862</text><line x1="64" y1="24.0" x2="736" y2="24.0" class="grid"/><text x="54" y="28.0" class="axis-tick" text-anchor="end">0,877</text><line x1="64" y1="161.7" x2="736" y2="161.7" class="threshold"/><text x="736" y="153.7" class="threshold-label" text-anchor="end">limiar de alerta</text><line x1="64" y1="53.5" x2="736" y2="53.5" class="baseline-ref"/><text x="736" y="68.5" class="baseline-label" text-anchor="end">baseline de validação (0,869)</text><path d="M64.0,44.7 L232.0,78.0 L400.0,189.1 L568.0,209.5 L736.0,217.3" class="series-line"/><g class="marker"><title>2024-01_estavel: ROC AUC 0,8711 (Δ +0,0024)</title><circle cx="64.0" cy="44.7" r="7" class="marker-halo"/><circle cx="64.0" cy="44.7" r="5" class="marker-dot"/></g><text x="64.0" y="260.0" class="axis-label" text-anchor="middle">2024-01</text><text x="75.0" y="29.7" class="point-value" text-anchor="start">0,871</text><g class="marker"><title>2024-02_inflacao_leve: ROC AUC 0,8619 (Δ -0,0068)</title><circle cx="232.0" cy="78.0" r="7" class="marker-halo"/><circle cx="232.0" cy="78.0" r="5" class="marker-dot"/></g><text x="232.0" y="260.0" class="axis-label" text-anchor="middle">2024-02</text><g class="marker"><title>2024-03_inflacao_forte: ROC AUC 0,8311 (Δ -0,0376)</title><circle cx="400.0" cy="189.1" r="7" class="marker-halo"/><circle cx="400.0" cy="189.1" r="5" class="marker-dot"/></g><text x="400.0" y="260.0" class="axis-label" text-anchor="middle">2024-03</text><g class="marker"><title>2024-04_novo_perfil: ROC AUC 0,8254 (Δ -0,0432)</title><circle cx="568.0" cy="209.5" r="7" class="marker-halo"/><circle cx="568.0" cy="209.5" r="5" class="marker-dot"/></g><text x="568.0" y="260.0" class="axis-label" text-anchor="middle">2024-04</text><g class="marker"><title>2024-05_recessao: ROC AUC 0,8233 (Δ -0,0454)</title><circle cx="736.0" cy="217.3" r="7" class="marker-halo"/><circle cx="736.0" cy="217.3" r="5" class="marker-dot"/></g><text x="736.0" y="260.0" class="axis-label" text-anchor="middle">2024-05</text><text x="725.0" y="202.3" class="point-value" text-anchor="end">0,823</text><line x1="64" y1="238" x2="736" y2="238" class="axis"/></svg>
+</section>
+
+<section>
+  <h2>Inadimplência na carteira aprovada</h2>
+  <p class="hint">A métrica de negócio: entre os clientes que o modelo <em>aprovou</em>,
+  quantos deixaram de pagar. Gráfico separado do AUC de propósito — escalas diferentes
+  nunca compartilham eixo.</p>
+  <svg viewBox="0 0 760 300" width="100%" role="img" aria-label="Inadimplência na carteira aprovada por lote de produção, comparado com baseline de validação" class="chart chart--line"><line x1="64" y1="238.0" x2="736" y2="238.0" class="grid"/><text x="54" y="242.0" class="axis-tick" text-anchor="end">0,014</text><line x1="64" y1="184.5" x2="736" y2="184.5" class="grid"/><text x="54" y="188.5" class="axis-tick" text-anchor="end">0,022</text><line x1="64" y1="131.0" x2="736" y2="131.0" class="grid"/><text x="54" y="135.0" class="axis-tick" text-anchor="end">0,031</text><line x1="64" y1="77.5" x2="736" y2="77.5" class="grid"/><text x="54" y="81.5" class="axis-tick" text-anchor="end">0,040</text><line x1="64" y1="24.0" x2="736" y2="24.0" class="grid"/><text x="54" y="28.0" class="axis-tick" text-anchor="end">0,048</text><line x1="64" y1="199.3" x2="736" y2="199.3" class="baseline-ref"/><text x="736" y="214.3" class="baseline-label" text-anchor="end">baseline de validação (0,020)</text><path d="M64.0,217.3 L232.0,201.3 L400.0,204.3 L568.0,212.4 L736.0,44.7" class="series-line"/><g class="marker"><title>2024-01_estavel: 1,71% de inadimplência entre os aprovados</title><circle cx="64.0" cy="217.3" r="7" class="marker-halo"/><circle cx="64.0" cy="217.3" r="5" class="marker-dot"/></g><text x="64.0" y="260.0" class="axis-label" text-anchor="middle">2024-01</text><text x="75.0" y="202.3" class="point-value" text-anchor="start">0,017</text><g class="marker"><title>2024-02_inflacao_leve: 1,97% de inadimplência entre os aprovados</title><circle cx="232.0" cy="201.3" r="7" class="marker-halo"/><circle cx="232.0" cy="201.3" r="5" class="marker-dot"/></g><text x="232.0" y="260.0" class="axis-label" text-anchor="middle">2024-02</text><g class="marker"><title>2024-03_inflacao_forte: 1,92% de inadimplência entre os aprovados</title><circle cx="400.0" cy="204.3" r="7" class="marker-halo"/><circle cx="400.0" cy="204.3" r="5" class="marker-dot"/></g><text x="400.0" y="260.0" class="axis-label" text-anchor="middle">2024-03</text><g class="marker"><title>2024-04_novo_perfil: 1,79% de inadimplência entre os aprovados</title><circle cx="568.0" cy="212.4" r="7" class="marker-halo"/><circle cx="568.0" cy="212.4" r="5" class="marker-dot"/></g><text x="568.0" y="260.0" class="axis-label" text-anchor="middle">2024-04</text><g class="marker"><title>2024-05_recessao: 4,48% de inadimplência entre os aprovados</title><circle cx="736.0" cy="44.7" r="7" class="marker-halo"/><circle cx="736.0" cy="44.7" r="5" class="marker-dot"/></g><text x="736.0" y="260.0" class="axis-label" text-anchor="middle">2024-05</text><text x="725.0" y="29.7" class="point-value" text-anchor="end">0,045</text><line x1="64" y1="238" x2="736" y2="238" class="axis"/></svg>
+</section>
+
+<section>
+  <h2>Alertas por lote</h2>
+  <p class="hint">Cada alerta traz ícone e rótulo; a cor é reforço, nunca o único canal
+  de informação.</p>
+  <table class="data-table">
+    <thead><tr><th scope="col">Lote</th><th scope="col">Features em drift</th>
+    <th scope="col">Alertas</th></tr></thead>
+    <tbody><tr><th scope="row">2024-01_estavel</th><td class="cell-empty">nenhuma</td><td><span class="badge badge--good"><span aria-hidden="true">✅</span> Sem alertas</span></td></tr><tr><th scope="row">2024-02_inflacao_leve</th><td class="cell-empty">nenhuma</td><td><span class="badge badge--good"><span aria-hidden="true">✅</span> Sem alertas</span></td></tr><tr><th scope="row">2024-03_inflacao_forte</th><td>MonthlyIncome, DebtRatio</td><td><span class="badge badge--serious"><span aria-hidden="true">📉</span> Queda de desempenho</span><span class="badge badge--warning"><span aria-hidden="true">📊</span> Drift de feature</span></td></tr><tr><th scope="row">2024-04_novo_perfil</th><td>age, MonthlyIncome, DebtRatio</td><td><span class="badge badge--serious"><span aria-hidden="true">📉</span> Queda de desempenho</span><span class="badge badge--warning"><span aria-hidden="true">🌊</span> Drift de dataset</span><span class="badge badge--warning"><span aria-hidden="true">📊</span> Drift de feature</span></td></tr><tr><th scope="row">2024-05_recessao</th><td class="cell-empty">nenhuma</td><td><span class="badge badge--critical"><span aria-hidden="true">🔇</span> Degradação silenciosa</span><span class="badge badge--serious"><span aria-hidden="true">📉</span> Queda de desempenho</span></td></tr></tbody>
+  </table>
+</section>
+
+<section>
+  <h2>Status das tarefas do pipeline</h2>
+  <p class="hint">Status e duração de cada tarefa, lote por lote. Tarefa
+  <em>bloqueada</em> significa que o portão de dados barrou o lote antes de o modelo vê-lo.</p>
+  <table class="data-table"><thead><tr><th scope="col">Lote</th><th>ingestao</th><th>validacao</th><th>inferencia</th><th>deteccao_drift</th><th>publicacao</th></tr></thead><tbody><tr><th scope="row">2024-01_estavel</th><td class="status status--good" title="sucesso"><span aria-hidden="true">✅</span> sucesso<span class="duration">0,01s</span></td><td class="status status--good" title="sucesso"><span aria-hidden="true">✅</span> sucesso<span class="duration">0,01s</span></td><td class="status status--good" title="sucesso"><span aria-hidden="true">✅</span> sucesso<span class="duration">0,01s</span></td><td class="status status--good" title="sucesso"><span aria-hidden="true">✅</span> sucesso<span class="duration">4,03s</span></td><td class="status status--good" title="sucesso"><span aria-hidden="true">✅</span> sucesso<span class="duration">0,89s</span></td></tr><tr><th scope="row">2024-02_inflacao_leve</th><td class="status status--good" title="sucesso"><span aria-hidden="true">✅</span> sucesso<span class="duration">0,01s</span></td><td class="status status--good" title="sucesso"><span aria-hidden="true">✅</span> sucesso<span class="duration">0,01s</span></td><td class="status status--good" title="sucesso"><span aria-hidden="true">✅</span> sucesso<span class="duration">0,01s</span></td><td class="status status--good" title="sucesso"><span aria-hidden="true">✅</span> sucesso<span class="duration">3,89s</span></td><td class="status status--good" title="sucesso"><span aria-hidden="true">✅</span> sucesso<span class="duration">0,05s</span></td></tr><tr><th scope="row">2024-03_inflacao_forte</th><td class="status status--good" title="sucesso"><span aria-hidden="true">✅</span> sucesso<span class="duration">0,01s</span></td><td class="status status--good" title="sucesso"><span aria-hidden="true">✅</span> sucesso<span class="duration">0,01s</span></td><td class="status status--good" title="sucesso"><span aria-hidden="true">✅</span> sucesso<span class="duration">0,01s</span></td><td class="status status--good" title="sucesso"><span aria-hidden="true">✅</span> sucesso<span class="duration">3,87s</span></td><td class="status status--good" title="sucesso"><span aria-hidden="true">✅</span> sucesso<span class="duration">0,05s</span></td></tr><tr><th scope="row">2024-04_novo_perfil</th><td class="status status--good" title="sucesso"><span aria-hidden="true">✅</span> sucesso<span class="duration">0,01s</span></td><td class="status status--good" title="sucesso"><span aria-hidden="true">✅</span> sucesso<span class="duration">0,01s</span></td><td class="status status--good" title="sucesso"><span aria-hidden="true">✅</span> sucesso<span class="duration">0,01s</span></td><td class="status status--good" title="sucesso"><span aria-hidden="true">✅</span> sucesso<span class="duration">3,73s</span></td><td class="status status--good" title="sucesso"><span aria-hidden="true">✅</span> sucesso<span class="duration">0,05s</span></td></tr><tr><th scope="row">2024-05_recessao</th><td class="status status--good" title="sucesso"><span aria-hidden="true">✅</span> sucesso<span class="duration">0,00s</span></td><td class="status status--good" title="sucesso"><span aria-hidden="true">✅</span> sucesso<span class="duration">0,01s</span></td><td class="status status--good" title="sucesso"><span aria-hidden="true">✅</span> sucesso<span class="duration">0,01s</span></td><td class="status status--good" title="sucesso"><span aria-hidden="true">✅</span> sucesso<span class="duration">3,74s</span></td><td class="status status--good" title="sucesso"><span aria-hidden="true">✅</span> sucesso<span class="duration">0,05s</span></td></tr></tbody></table>
+</section>
+
+<section>
+  <h2>Contrato de dados bloqueando o lote corrompido</h2>
+  <p class="hint">Ocorrências reprovadas por regra do contrato, no lote em que injetamos
+  11 defeitos de propósito. Nenhuma linha deste lote chegou ao modelo: a tarefa de
+  inferência foi bloqueada no portão. Barras horizontais porque os nomes das regras
+  são longos.</p>
+  <svg viewBox="0 0 960 460" width="100%" role="img" aria-label="Violações de contrato por regra" class="chart chart--bars"><g class="bar-row"><title>MonthlyIncome:not_nullable: 40 ocorrência(s) reprovada(s)</title><text x="418" y="19.0" class="axis-label" text-anchor="end">MonthlyIncome · não pode ser nulo</text><rect x="430" y="6" width="420.0" height="18" rx="4" fill="#0d366b"/><text x="860.0" y="19.0" class="bar-value">40 ocorrências</text></g><g class="bar-row"><title>NumberOfDependents:coerce_dtype(&#x27;int64&#x27;): 15 ocorrência(s) reprovada(s)</title><text x="418" y="51.0" class="axis-label" text-anchor="end">NumberOfDependents · não foi possível converter para &#x27;int64&#x27;</text><rect x="430" y="38" width="157.5" height="18" rx="4" fill="#6da7ec"/><text x="597.5" y="51.0" class="bar-value">15 ocorrências</text></g><g class="bar-row"><title>age:greater_than_or_equal_to(18): 15 ocorrência(s) reprovada(s)</title><text x="418" y="83.0" class="axis-label" text-anchor="end">age · ≥ 18</text><rect x="430" y="70" width="157.5" height="18" rx="4" fill="#6da7ec"/><text x="597.5" y="83.0" class="bar-value">15 ocorrências</text></g><g class="bar-row"><title>NumberOfDependents:not_nullable: 15 ocorrência(s) reprovada(s)</title><text x="418" y="115.0" class="axis-label" text-anchor="end">NumberOfDependents · não pode ser nulo</text><rect x="430" y="102" width="157.5" height="18" rx="4" fill="#6da7ec"/><text x="597.5" y="115.0" class="bar-value">15 ocorrências</text></g><g class="bar-row"><title>NumberOfDependents:dtype(&#x27;int64&#x27;): 15 ocorrência(s) reprovada(s)</title><text x="418" y="147.0" class="axis-label" text-anchor="end">NumberOfDependents · tipo deve ser &#x27;int64&#x27;</text><rect x="430" y="134" width="157.5" height="18" rx="4" fill="#6da7ec"/><text x="597.5" y="147.0" class="bar-value">15 ocorrências</text></g><g class="bar-row"><title>RevolvingUtilizationOfUnsecuredLines:less_than_or_equal_to(10.0): 10 ocorrência(s) reprovada(s)</title><text x="418" y="179.0" class="axis-label" text-anchor="end">RevolvingUtilizationOfUnsecuredLines · ≤ 10.0</text><rect x="430" y="166" width="105.0" height="18" rx="4" fill="#86b6ef"/><text x="545.0" y="179.0" class="bar-value">10 ocorrências</text></g><g class="bar-row"><title>NumberOfTime30-59DaysPastDueNotWorse:less_than_or_equal_to(20): 10 ocorrência(s) reprovada(s)</title><text x="418" y="211.0" class="axis-label" text-anchor="end">NumberOfTime30-59DaysPastDueNotWorse · ≤ 20</text><rect x="430" y="198" width="105.0" height="18" rx="4" fill="#86b6ef"/><text x="545.0" y="211.0" class="bar-value">10 ocorrências</text></g><g class="bar-row"><title>DebtRatio:less_than_or_equal_to(10.0): 10 ocorrência(s) reprovada(s)</title><text x="418" y="243.0" class="axis-label" text-anchor="end">DebtRatio · ≤ 10.0</text><rect x="430" y="230" width="105.0" height="18" rx="4" fill="#86b6ef"/><text x="545.0" y="243.0" class="bar-value">10 ocorrências</text></g><g class="bar-row"><title>MonthlyIncome:greater_than_or_equal_to(0.0): 10 ocorrência(s) reprovada(s)</title><text x="418" y="275.0" class="axis-label" text-anchor="end">MonthlyIncome · ≥ 0.0</text><rect x="430" y="262" width="105.0" height="18" rx="4" fill="#86b6ef"/><text x="545.0" y="275.0" class="bar-value">10 ocorrências</text></g><g class="bar-row"><title>NumberOfTimes90DaysLate:less_than_or_equal_to(20): 10 ocorrência(s) reprovada(s)</title><text x="418" y="307.0" class="axis-label" text-anchor="end">NumberOfTimes90DaysLate · ≤ 20</text><rect x="430" y="294" width="105.0" height="18" rx="4" fill="#86b6ef"/><text x="545.0" y="307.0" class="bar-value">10 ocorrências</text></g><g class="bar-row"><title>SeriousDlqin2yrs:isin([0, 1]): 10 ocorrência(s) reprovada(s)</title><text x="418" y="339.0" class="axis-label" text-anchor="end">SeriousDlqin2yrs · só aceita [0, 1]</text><rect x="430" y="326" width="105.0" height="18" rx="4" fill="#86b6ef"/><text x="545.0" y="339.0" class="bar-value">10 ocorrências</text></g><g class="bar-row"><title>age:less_than_or_equal_to(100): 5 ocorrência(s) reprovada(s)</title><text x="418" y="371.0" class="axis-label" text-anchor="end">age · ≤ 100</text><rect x="430" y="358" width="52.5" height="18" rx="4" fill="#9ec5f4"/><text x="492.5" y="371.0" class="bar-value">5 ocorrências</text></g><g class="bar-row"><title>CreditReferenceContract:column_in_schema: 1 ocorrência(s) reprovada(s)</title><text x="418" y="403.0" class="axis-label" text-anchor="end">coluna fora do contrato</text><rect x="430" y="390" width="10.5" height="18" rx="4" fill="#cde2fb"/><text x="450.5" y="403.0" class="bar-value">1 ocorrência</text></g><g class="bar-row"><title>CreditReferenceContract:o lote contém linhas duplicadas: 1 ocorrência(s) reprovada(s)</title><text x="418" y="435.0" class="axis-label" text-anchor="end">o lote contém linhas duplicadas</text><rect x="430" y="422" width="10.5" height="18" rx="4" fill="#cde2fb"/><text x="450.5" y="435.0" class="bar-value">1 ocorrência</text></g><line x1="430" y1="0" x2="430" y2="448" class="axis"/></svg>
+</section>
+
+<section>
+  <h2>Resumo completo</h2>
+  <p class="hint">Toda a informação dos gráficos acima, também em texto — para leitores
+  de tela, impressão e conferência numérica.</p>
+  <table class="data-table"><thead><tr><th scope="col">Lote</th><th scope="col">Status</th><th scope="col">Linhas</th><th scope="col">PSI máx.</th><th scope="col">Features em drift</th><th scope="col">ROC AUC</th><th scope="col">Δ AUC</th><th scope="col">Inadimpl. aprovada</th><th scope="col">Alertas</th></tr></thead><tbody><tr><th scope="row">2024-01_estavel</th><td>sucesso</td><td class="num">8000</td><td class="num">0,002</td><td class="num">0</td><td class="num">0,8711</td><td class="num">+0,0024</td><td class="num">1,71%</td><td><span class="badge badge--good"><span aria-hidden="true">✅</span> Sem alertas</span></td></tr><tr><th scope="row">2024-02_inflacao_leve</th><td>sucesso</td><td class="num">8000</td><td class="num">0,055</td><td class="num">0</td><td class="num">0,8619</td><td class="num">-0,0068</td><td class="num">1,97%</td><td><span class="badge badge--good"><span aria-hidden="true">✅</span> Sem alertas</span></td></tr><tr><th scope="row">2024-03_inflacao_forte</th><td>sucesso</td><td class="num">8000</td><td class="num">0,467</td><td class="num">2</td><td class="num">0,8311</td><td class="num">-0,0376</td><td class="num">1,92%</td><td><span class="badge badge--serious"><span aria-hidden="true">📉</span> Queda de desempenho</span><span class="badge badge--warning"><span aria-hidden="true">📊</span> Drift de feature</span></td></tr><tr><th scope="row">2024-04_novo_perfil</th><td>sucesso</td><td class="num">8000</td><td class="num">0,549</td><td class="num">3</td><td class="num">0,8254</td><td class="num">-0,0432</td><td class="num">1,79%</td><td><span class="badge badge--serious"><span aria-hidden="true">📉</span> Queda de desempenho</span><span class="badge badge--warning"><span aria-hidden="true">🌊</span> Drift de dataset</span><span class="badge badge--warning"><span aria-hidden="true">📊</span> Drift de feature</span></td></tr><tr><th scope="row">2024-05_recessao</th><td>sucesso</td><td class="num">8000</td><td class="num">0,002</td><td class="num">0</td><td class="num">0,8233</td><td class="num">-0,0454</td><td class="num">4,48%</td><td><span class="badge badge--critical"><span aria-hidden="true">🔇</span> Degradação silenciosa</span><span class="badge badge--serious"><span aria-hidden="true">📉</span> Queda de desempenho</span></td></tr></tbody></table>
+</section>
+
+<section>
+  <h2>Relatórios detalhados do Evidently</h2>
+  <p class="hint">Um relatório por lote por tipo de análise, com os testes estatísticos
+  completos e a distribuição de cada feature.</p>
+  <ul class="links"><li><a href="2024-01_estavel__data_drift.html">2024-01_estavel — data drift</a></li><li><a href="2024-01_estavel__data_summary.html">2024-01_estavel — data summary</a></li><li><a href="2024-01_estavel__classification.html">2024-01_estavel — classification</a></li><li><a href="2024-02_inflacao_leve__data_drift.html">2024-02_inflacao_leve — data drift</a></li><li><a href="2024-02_inflacao_leve__data_summary.html">2024-02_inflacao_leve — data summary</a></li><li><a href="2024-02_inflacao_leve__classification.html">2024-02_inflacao_leve — classification</a></li><li><a href="2024-03_inflacao_forte__data_drift.html">2024-03_inflacao_forte — data drift</a></li><li><a href="2024-03_inflacao_forte__data_summary.html">2024-03_inflacao_forte — data summary</a></li><li><a href="2024-03_inflacao_forte__classification.html">2024-03_inflacao_forte — classification</a></li><li><a href="2024-04_novo_perfil__data_drift.html">2024-04_novo_perfil — data drift</a></li><li><a href="2024-04_novo_perfil__data_summary.html">2024-04_novo_perfil — data summary</a></li><li><a href="2024-04_novo_perfil__classification.html">2024-04_novo_perfil — classification</a></li><li><a href="2024-05_recessao__data_drift.html">2024-05_recessao — data drift</a></li><li><a href="2024-05_recessao__data_summary.html">2024-05_recessao — data summary</a></li><li><a href="2024-05_recessao__classification.html">2024-05_recessao — classification</a></li></ul>
+</section>
+</div>
+</body>
+</html>

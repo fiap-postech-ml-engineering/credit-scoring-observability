@@ -1,0 +1,66 @@
+{
+  "batch_name": "2024-03_inflacao_forte",
+  "n_rows": 8000,
+  "labeled": true,
+  "summary": {
+    "n_features": 10,
+    "n_drifted": 2,
+    "drift_share": 0.2,
+    "dataset_drift": false,
+    "max_psi": 0.467167,
+    "drifted_features": [
+      "MonthlyIncome",
+      "DebtRatio"
+    ]
+  },
+  "performance": {
+    "roc_auc": 0.8311067302998071,
+    "pr_auc": 0.3110039350998424,
+    "ks_statistic": 0.5192454715484603,
+    "brier": 0.19330949023278424,
+    "precision": 0.1548311990686845,
+    "recall": 0.7932405566600398,
+    "f1": 0.2590909090909091,
+    "default_rate": 0.062875,
+    "approval_rate": 0.677875,
+    "approved_bad_rate": 0.019177576986907616,
+    "n_rows": 8000.0
+  },
+  "performance_delta": {
+    "roc_auc": -0.037571,
+    "pr_auc": -0.078017,
+    "ks_statistic": -0.072756,
+    "brier": 0.056947,
+    "precision": -0.069365,
+    "recall": 0.024634,
+    "f1": -0.088044,
+    "default_rate": -0.003729,
+    "approval_rate": -0.093789,
+    "approved_bad_rate": -0.000794,
+    "n_rows": -14191.0
+  },
+  "alerts": [
+    "queda_de_desempenho",
+    "drift_de_feature"
+  ],
+  "performance_degraded": true,
+  "silent_degradation": false,
+  "psi_by_feature": {
+    "MonthlyIncome": 0.467167,
+    "DebtRatio": 0.260764,
+    "RevolvingUtilizationOfUnsecuredLines": 0.132358,
+    "NumberOfOpenCreditLinesAndLoans": 0.000786,
+    "age": 0.000565,
+    "NumberOfDependents": 0.000239,
+    "NumberRealEstateLoansOrLines": 0.000185,
+    "NumberOfTime30-59DaysPastDueNotWorse": 2.6e-05,
+    "NumberOfTimes90DaysLate": 0.0,
+    "NumberOfTime60-89DaysPastDueNotWorse": 0.0
+  },
+  "html_reports": {
+    "data_drift": "/root/credit-scoring-observability/reports/2024-03_inflacao_forte__data_drift.html",
+    "data_summary": "/root/credit-scoring-observability/reports/2024-03_inflacao_forte__data_summary.html",
+    "classification": "/root/credit-scoring-observability/reports/2024-03_inflacao_forte__classification.html"
+  },
+  "evaluated_at": "2026-10-19T13:33:14.035126+00:00"
+}

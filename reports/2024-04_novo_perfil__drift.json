@@ -1,0 +1,68 @@
+{
+  "batch_name": "2024-04_novo_perfil",
+  "n_rows": 8000,
+  "labeled": true,
+  "summary": {
+    "n_features": 10,
+    "n_drifted": 3,
+    "drift_share": 0.3,
+    "dataset_drift": true,
+    "max_psi": 0.548898,
+    "drifted_features": [
+      "age",
+      "MonthlyIncome",
+      "DebtRatio"
+    ]
+  },
+  "performance": {
+    "roc_auc": 0.8254487167654243,
+    "pr_auc": 0.3105613323491933,
+    "ks_statistic": 0.5110430165088389,
+    "brier": 0.21465247413576927,
+    "precision": 0.15622849277357193,
+    "recall": 0.8330275229357799,
+    "f1": 0.2631121414082874,
+    "default_rate": 0.068125,
+    "approval_rate": 0.6367499999999999,
+    "approved_bad_rate": 0.017864153906556733,
+    "n_rows": 8000.0
+  },
+  "performance_delta": {
+    "roc_auc": -0.043229,
+    "pr_auc": -0.078459,
+    "ks_statistic": -0.080959,
+    "brier": 0.07829,
+    "precision": -0.067967,
+    "recall": 0.064421,
+    "f1": -0.084023,
+    "default_rate": 0.001521,
+    "approval_rate": -0.134914,
+    "approved_bad_rate": -0.002108,
+    "n_rows": -14191.0
+  },
+  "alerts": [
+    "queda_de_desempenho",
+    "drift_de_dataset",
+    "drift_de_feature"
+  ],
+  "performance_degraded": true,
+  "silent_degradation": false,
+  "psi_by_feature": {
+    "age": 0.548898,
+    "MonthlyIncome": 0.528119,
+    "DebtRatio": 0.285932,
+    "RevolvingUtilizationOfUnsecuredLines": 0.156053,
+    "NumberOfOpenCreditLinesAndLoans": 0.000711,
+    "NumberOfDependents": 0.00023,
+    "NumberRealEstateLoansOrLines": 0.00017,
+    "NumberOfTime30-59DaysPastDueNotWorse": 2e-05,
+    "NumberOfTimes90DaysLate": 0.0,
+    "NumberOfTime60-89DaysPastDueNotWorse": 0.0
+  },
+  "html_reports": {
+    "data_drift": "/root/credit-scoring-observability/reports/2024-04_novo_perfil__data_drift.html",
+    "data_summary": "/root/credit-scoring-observability/reports/2024-04_novo_perfil__data_summary.html",
+    "classification": "/root/credit-scoring-observability/reports/2024-04_novo_perfil__classification.html"
+  },
+  "evaluated_at": "2026-10-19T13:33:18.013947+00:00"
+}
