@@ -51,6 +51,21 @@ groups:
             A ingestão foi interrompida pelo portão de dados. Nenhuma linha
             deste lote chegou ao modelo. Conferir o laudo de validação.
 
+      - alert: DisparidadeEtaria
+        expr: >
+          credit_fairness_disparate_impact_ratio < 0.8
+          or credit_fairness_equal_opportunity_gap > 0.10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disparidade entre faixas etárias no lote {{ $labels.batch }}"
+          description: >
+            A aprovação entre faixas etárias ficou abaixo da regra dos quatro
+            quintos, ou bons pagadores de uma faixa são aprovados mais de 10
+            p.p. abaixo dos de outra. Encaminhar para revisão de equidade com
+            compliance (ver docs/governance_lgpd.md, seção 5).
+
   - name: credit-scoring-pipeline
     rules:
       - alert: TarefaDoPipelineFalhou

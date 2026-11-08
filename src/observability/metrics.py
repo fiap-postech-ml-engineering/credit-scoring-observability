@@ -115,6 +115,7 @@ class DriftMetricsCollector(Collector):
     def collect(self) -> Iterator[Metric]:
         yield from self._collect_contract_metrics()
         yield from self._collect_drift_metrics()
+        yield from self._collect_fairness_metrics()
 
     def _collect_contract_metrics(self) -> Iterator[Metric]:
         passed = GaugeMetricFamily(
@@ -237,6 +238,48 @@ class DriftMetricsCollector(Collector):
         yield performance_delta
         yield alerts
         yield silent
+
+    def _collect_fairness_metrics(self) -> Iterator[Metric]:
+        """Expõe a auditoria de equidade do modelo em produção (Etapa 4).
+
+        Disparidade entre faixas etárias vira série como o PSI: cruzou o
+        limiar, a regra `DisparidadeEtaria` dispara.
+        """
+        impact = GaugeMetricFamily(
+            "credit_fairness_disparate_impact_ratio",
+            "Menor taxa de aprovação entre faixas etárias dividida pela maior, por lote.",
+            labels=["batch"],
+        )
+        opportunity = GaugeMetricFamily(
+            "credit_fairness_equal_opportunity_gap",
+            "Diferença máxima na aprovação de bons pagadores entre faixas etárias, por lote.",
+            labels=["batch"],
+        )
+        approval = GaugeMetricFamily(
+            "credit_fairness_group_approval_rate",
+            "Taxa de aprovação por faixa etária, por lote.",
+            labels=["batch", "group"],
+        )
+        approved_bad = GaugeMetricFamily(
+            "credit_fairness_group_approved_bad_rate",
+            "Inadimplência dentro da carteira aprovada, por faixa etária e lote.",
+            labels=["batch", "group"],
+        )
+
+        for laudo in self._load("equidade_idade.json"):
+            for report in laudo.get("production_model") or []:
+                batch = str(report.get("batch", "desconhecido"))
+                impact.add_metric([batch], float(report.get("disparate_impact_ratio", 1.0)))
+                opportunity.add_metric([batch], float(report.get("equal_opportunity_gap", 0.0)))
+                for group in report.get("groups") or []:
+                    labels = [batch, str(group.get("group"))]
+                    approval.add_metric(labels, float(group.get("approval_rate", 0.0)))
+                    approved_bad.add_metric(labels, float(group.get("approved_bad_rate", 0.0)))
+
+        yield impact
+        yield opportunity
+        yield approval
+        yield approved_bad
 
 
 class PipelineRunMetricsCollector(Collector):
