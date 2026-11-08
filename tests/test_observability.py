@@ -147,6 +147,39 @@ def test_collector_de_contrato_expoe_violacoes_por_regra(tmp_path: Path) -> None
     assert por_regra["MonthlyIncome:not_nullable"] == 40.0
 
 
+def test_collector_expoe_a_auditoria_de_equidade(tmp_path: Path) -> None:
+    (tmp_path / "equidade_idade.json").write_text(
+        json.dumps(
+            {
+                "production_model": [
+                    {
+                        "batch": "2024-05_recessao",
+                        "disparate_impact_ratio": 0.62,
+                        "equal_opportunity_gap": 0.22,
+                        "groups": [
+                            {"group": "18-29", "approval_rate": 0.57, "approved_bad_rate": 0.26},
+                            {"group": "60+", "approval_rate": 0.91, "approved_bad_rate": 0.02},
+                        ],
+                    }
+                ],
+                # O modelo sem idade é experimento, não produção: não vira série.
+                "model_without_age": [{"batch": "2024-05_recessao"}],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    familias = {m.name: m for m in DriftMetricsCollector(tmp_path).collect()}
+
+    assert familias["credit_fairness_disparate_impact_ratio"].samples[0].value == 0.62
+    assert familias["credit_fairness_equal_opportunity_gap"].samples[0].value == 0.22
+    ruins = {
+        s.labels["group"]: s.value
+        for s in familias["credit_fairness_group_approved_bad_rate"].samples
+    }
+    assert ruins == {"18-29": 0.26, "60+": 0.02}
+
+
 def test_collector_de_execucoes_expoe_status_das_tarefas(tmp_path: Path) -> None:
     (tmp_path / "pipeline_runs.json").write_text(
         json.dumps(
