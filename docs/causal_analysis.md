@@ -143,6 +143,35 @@ e não apenas AUC.
 | **PSI baixo, desempenho caindo** | **concept drift** | **retreinar — recalibrar não resolve** |
 | Contrato violado | falha de qualidade a montante | corrigir a origem; o lote já foi bloqueado |
 
+### Plano de ação quando o alerta dispara
+
+O quadro acima diz *o que* está acontecendo; o plano abaixo diz *quem faz o
+quê*, com critério objetivo de entrada para cada ação. Os limiares são os mesmos
+de `src/config/settings.py` e de `observability/alert_rules.yml`.
+
+| Ação | Quando | O que se faz | Quem decide |
+|---|---|---|---|
+| **1. Investigar** | qualquer alerta `warning` (`DriftDeFeature`, `QuedaDeDesempenho`, `DisparidadeEtaria`) | abrir o relatório Evidently do lote, conferir PSI por feature e métricas por faixa etária; checar se o deslocamento é real (economia) ou artefato (mudança de origem, bug a montante) | time de dados, em até 2 dias úteis |
+| **2. Recalibrar** | data drift confirmado (PSI ≥ 0,25) **e** AUC estável (Δ > −0,03), por 2 lotes seguidos | ajustar o limiar de decisão para devolver a taxa de aprovação e a inadimplência aprovada ao alvo; sem retreino | time de dados + risco de crédito |
+| **3. Retreinar** | `DegradacaoSilenciosa`, ou Δ AUC ≤ −0,03 por 2 lotes seguidos | retreinar com rótulos do regime novo como *challenger*; promover só se vencer o *champion* em AUC **e** em inadimplência aprovada num lote fora da amostra, sem piorar a auditoria de equidade | time de dados propõe, comitê de modelo aprova |
+| **4. Rollback** | modelo recém-promovido com desempenho abaixo do anterior no primeiro lote rotulado, ou `TarefaDoPipelineFalhou` causada pelo artefato novo | voltar à versão anterior no MLflow Model Registry (a linhagem já está registrada) | plantão, imediato; comunicado ao comitê |
+| **5. Revisão humana** | `DegradacaoSilenciosa` ativa, ou `DisparidadeEtaria` ativa na faixa afetada | recusas e aprovações de risco limítrofe passam por analista até o retreino ou a mitigação entrar; atende também o direito de revisão do art. 20 | risco de crédito + compliance |
+| **6. Bloquear** | `ContratoDeDadosViolado` | nada a decidir: o lote já foi barrado pelo portão; corrigir a origem e reprocessar | engenharia de dados |
+
+Duas observações sobre o plano:
+
+- **Recalibrar nunca é resposta a concept drift.** Na recessão simulada a
+  inadimplência aprovada vai a 4,48% com PSI 0,002: mover o limiar reduz
+  aprovação de todos para compensar um erro concentrado num grupo (25,7% de
+  inadimplência aprovada na faixa 18-29 — ver
+  [`governance_lgpd.md`](governance_lgpd.md#5-vieses-e-mitigação)). Por isso a
+  ação 3 é disparada pela degradação silenciosa, não pelo PSI.
+- **Retreino automático não é o padrão.** Retreinar sozinho sobre dado que já
+  carrega concept drift ensina o modelo ao regime novo, inclusive seus vieses,
+  e o rótulo de crédito chega com atraso. O desenho é *champion/challenger*
+  com aprovação humana; a automação vai até gerar o candidato e o laudo
+  comparativo.
+
 Uma ressalva honesta: a atribuição limpa deste documento é possível porque
 **nós** geramos o drift e conhecemos a verdade. Em produção, o rótulo chega com
 atraso (no crédito, 1 a 2 anos para confirmar inadimplência), e esse atraso é o

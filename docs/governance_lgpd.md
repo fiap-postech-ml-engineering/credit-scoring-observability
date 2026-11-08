@@ -112,43 +112,128 @@ e crédito negado afeta.
 
 ## 5. Vieses e mitigação
 
-### O que foi examinado
+### O que foi medido: idade
 
-O modelo usa **idade** como feature, e a análise de drift mostrou que ela
-carrega peso real (PSI de 0,549 no lote `2024-04_novo_perfil`). Idade é
-critério protegido em várias jurisdições, e no Brasil discriminação etária na
-oferta de crédito é tema sensível.
+O modelo usa **idade** como feature, e ela carrega peso real (PSI de 0,549 no
+lote `2024-04_novo_perfil`). Idade é critério protegido em várias jurisdições,
+e no Brasil discriminação etária na oferta de crédito é tema sensível. Como o
+atributo está no dado, o viés é **medido**, não só discutido:
+`src/governance/fairness.py` (`make fairness`, e também dentro de
+`make pipeline`) audita cada lote de produção em quatro faixas etárias e grava
+`reports/equidade_idade.json`.
 
-O cenário de concept drift documentado em
-[`causal_analysis.md`](causal_analysis.md) é, no fundo, um achado de equidade:
-o modelo **subestimava sistematicamente** o risco de jovens sem patrimônio
-imobiliário. Num regime econômico ele os aprovava bem; noutro, o mesmo
-comportamento virou prejuízo — e para o cliente, crédito concedido que ele não
-conseguiria pagar.
+Três métricas, cada uma respondendo a uma pergunta diferente:
+
+| Métrica | Pergunta | Limiar de alerta |
+|---|---|---|
+| **Razão de impacto desigual** (menor ÷ maior taxa de aprovação entre faixas) | a aprovação é parecida entre as faixas? | < 0,8 (regra dos quatro quintos) |
+| **Diferença de igualdade de oportunidade** (maior − menor aprovação **entre bons pagadores**) | quem de fato paga tem a mesma chance de ser aprovado? | > 0,10 |
+| **Inadimplência aprovada por faixa** | quando o modelo erra, quem paga a conta? | acompanhada no dashboard |
+
+A regra dos quatro quintos é convenção de auditoria norte-americana (EEOC),
+não limite legal brasileiro; usamos como limiar porque é a referência mais
+difundida. O limiar de 10 p.p. é escolha deste projeto. Os dois estão em
+`fairness.py` e no alerta `DisparidadeEtaria` do Prometheus — cruzou, dispara,
+como os alertas de drift.
+
+A linha de base é o lote `2024-01_estavel`: vem do pool futuro, nunca visto no
+treino, e não tem drift. Medir na Referência mediria o modelo sobre dados que
+ele memorizou.
+
+### Resultado na linha de base
+
+| Faixa | Participação | Inadimplência real | Aprovação | Aprovação de bons pagadores | Inadimplência aprovada |
+|---|---|---|---|---|---|
+| 18-29 | 5,6% | 7,4% | 60,6% | **64,2%** | 1,9% |
+| 30-44 | 26,6% | 9,1% | 65,1% | 70,2% | 2,1% |
+| 45-59 | 35,5% | 7,0% | 75,2% | 79,3% | 1,9% |
+| 60+ | 32,4% | 3,2% | 91,1% | **92,8%** | 1,3% |
+
+Razão de impacto desigual **0,665** e diferença de oportunidade **0,286**: os
+dois alertas disparam já no mês sem drift. Parte da diferença de aprovação é
+risco real (a faixa 60+ inadimple menos da metade), e é por isso que a métrica
+que pesa é a segunda: **um bom pagador de 18 a 29 anos tem 64% de chance de ser
+aprovado; um bom pagador acima de 60, 93%.** Note que a faixa 18-29 inadimple
+*menos* que a 30-44 e ainda assim é a menos aprovada.
+
+### O drift piorou a equidade?
+
+| Lote | Razão de impacto | Dif. de oportunidade | Inadimpl. aprovada 18-29 | Inadimpl. aprovada 60+ |
+|---|---|---|---|---|
+| `2024-01_estavel` | 0,665 | 0,286 | 1,9% | 1,3% |
+| `2024-02_inflacao_leve` | 0,679 | 0,247 | 2,1% | 1,5% |
+| `2024-03_inflacao_forte` | 0,619 | 0,297 | 3,6% | 1,5% |
+| `2024-04_novo_perfil` | 0,617 | **0,312** | 3,6% | 0,8% |
+| `2024-05_recessao` | 0,622 | 0,224 | **25,7%** | 1,6% |
+
+Duas leituras:
+
+1. **No data drift, a disparidade de aprovação cresce.** Em `2024-04` a faixa
+   18-29 passa de 6% para 25% da base, e a diferença de oportunidade chega ao
+   pior valor (0,312). O modelo opera fora do domínio de treino justamente
+   sobre o grupo que já tratava pior.
+2. **No concept drift, o dano muda de lado.** Na recessão a diferença de
+   oportunidade até *diminui* — mas porque o modelo continua aprovando jovens
+   que agora inadimplem: **25,7% da carteira aprovada de 18 a 29 anos não
+   paga**, contra 1,6% na faixa 60+. Para a fintech é prejuízo; para o
+   cliente jovem é crédito concedido que ele não conseguiria pagar. Equidade
+   não é só "aprovar igual": é também não empurrar dívida impagável para um
+   grupo. Nenhuma métrica de aprovação sozinha enxerga isso, daí a terceira
+   métrica estar no dashboard.
+
+### Tirar a idade do modelo resolve?
+
+Não. O mesmo estimador, retreinado na mesma Referência **sem** a coluna `age`:
+
+| Lote | AUC com idade | AUC sem idade | Razão de impacto com → sem | Dif. de oportunidade com → sem |
+|---|---|---|---|---|
+| `2024-01_estavel` | 0,8711 | 0,8682 | 0,665 → 0,710 | 0,286 → 0,231 |
+| `2024-04_novo_perfil` | 0,8254 | 0,8343 | 0,617 → 0,663 | 0,312 → 0,256 |
+| `2024-05_recessao` | 0,8233 | 0,8118 | 0,622 → 0,685 | 0,224 → 0,147 |
+
+A disparidade cai pouco e continua acima dos dois limiares em todos os lotes.
+(De passagem: em `2024-04`, em que a própria idade sofreu drift, o modelo sem
+idade tem AUC *maior* — uma feature que desloca com a demografia da base é
+também uma fonte de fragilidade.)
+O motivo é o **teste de proxy**: um classificador treinado para prever "tem de
+18 a 29 anos" usando só as outras nove features acerta com **ROC AUC 0,918**.
+Utilização de crédito, número de linhas abertas, financiamento imobiliário e
+dependentes codificam a idade. Remover a coluna remove o rótulo, não a
+informação — e ainda tira do auditor a forma mais direta de medir o problema.
 
 ### O que o dataset não permite verificar
 
-O Give Me Some Credit **não traz** gênero, raça, região ou estado civil. Então
-este projeto **não consegue** medir disparidade entre grupos protegidos —
-e dizer o contrário seria falso. Ausência de atributo não é ausência de viés:
-renda, endividamento e código postal funcionam como proxies de raça e classe
-em qualquer carteira de crédito brasileira.
+O Give Me Some Credit **não traz** gênero, raça, região ou estado civil. Para
+esses grupos este projeto **não consegue** medir disparidade, e dizer o
+contrário seria falso. Ausência de atributo não é ausência de viés: o teste
+de proxy acima mostra, com a idade, como as features carregam atributos que
+não estão nominalmente no modelo — renda, endividamento e CEP fazem o mesmo
+com raça e classe em qualquer carteira de crédito brasileira.
 
-### Plano de mitigação para produção
+### Plano de mitigação
 
-1. **Coletar atributos protegidos separadamente**, com base legal própria e
-   acesso restrito, usados **apenas** para auditoria de equidade — nunca como
-   feature do modelo.
-2. **Medir disparidade por grupo** a cada ciclo: taxa de aprovação, taxa de
-   falso positivo e falso negativo, calibração por grupo. Acrescentar essas
-   métricas ao mesmo pipeline de monitoramento que hoje mede PSI.
-3. **Definir limiar de disparidade** com a área de compliance e tratá-lo como
-   os alertas de drift: cruzou, dispara.
-4. **Revisar o uso de idade** com jurídico — se o ganho preditivo justifica o
-   risco regulatório, e se features correlacionadas conseguem substituí-la.
-5. **Testar proxies**: treinar um classificador para prever o atributo
-   protegido a partir das features do modelo. Se ele acerta bem, há proxy — e
-   remover o atributo direto não resolve nada.
+**Implementado neste projeto:**
+
+- auditoria por faixa etária em todo lote, no mesmo pipeline que mede PSI;
+- limiares de disparidade versionados em código e promovidos a alerta
+  (`DisparidadeEtaria`) e a painel no Grafana;
+- experimento "sem idade" e teste de proxy reproduzíveis com `make fairness`.
+
+**Necessário em produção:**
+
+1. **Decidir o uso de idade com o jurídico**, com os números acima na mesa: a
+   idade vale 0,003 de AUC na linha de base e os proxies carregam a maior
+   parte da disparidade. Retirá-la sozinha é cosmético; a decisão real é
+   sobre o limiar e sobre restrições de equidade no treino.
+2. **Mitigar no ponto certo**: limiar de decisão por faixa calibrado para
+   igualar a aprovação de bons pagadores (pós-processamento), ou restrição de
+   equidade no treino (in-processing). Ambos custam algum AUC — o trade-off
+   tem de ser decidido com compliance, não pelo time de dados sozinho.
+3. **Coletar atributos protegidos separadamente** (gênero, raça), com base
+   legal própria e acesso restrito, usados **apenas** para auditoria — nunca
+   como feature — e estender a mesma auditoria a eles.
+4. **Revisão humana obrigatória** para recusas na faixa com alerta ativo,
+   enquanto a disparidade não for tratada (ver art. 20, seção 4).
 
 ## 6. Retenção e eliminação (arts. 15 e 16)
 
@@ -209,6 +294,7 @@ declarada), mantém linhagem auditável de dado a decisão no MLflow e expõe os
 critérios de decisão em toda resposta da API.
 
 As lacunas conhecidas estão declaradas, não escondidas: não há revisão humana
-formalizada, não há explicação individual por decisão, e o dataset público não
-permite auditoria de equidade entre grupos protegidos. As três são
-pré-requisitos para operação real e estão endereçadas no plano acima.
+formalizada, não há explicação individual por decisão, e o dataset público só
+permite auditar equidade por idade — onde a auditoria encontrou disparidade
+acima dos limiares em todos os lotes, que remover a idade não resolve. As três
+são pré-requisitos para operação real e estão endereçadas no plano acima.

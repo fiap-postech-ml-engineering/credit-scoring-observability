@@ -125,6 +125,19 @@ monitoramento — o que aconteceria com métricas em memória.
 | `credit_drift_alert{batch,alert}` | gauge | alerta ativo |
 | `credit_silent_degradation{batch}` | gauge | **o alerta que só o cruzamento levanta** |
 
+**Equidade (Etapa 4)**
+
+| Métrica | Tipo | O que vigia |
+|---|---|---|
+| `credit_fairness_disparate_impact_ratio{batch}` | gauge | menor ÷ maior taxa de aprovação entre faixas etárias |
+| `credit_fairness_equal_opportunity_gap{batch}` | gauge | diferença na aprovação de **bons pagadores** entre faixas |
+| `credit_fairness_group_approval_rate{batch,group}` | gauge | aprovação por faixa etária |
+| `credit_fairness_group_approved_bad_rate{batch,group}` | gauge | quem paga a conta quando o modelo erra |
+
+Lidas de `reports/equidade_idade.json` pelo mesmo collector dos laudos de
+drift. Detalhes e resultados em
+[`governance_lgpd.md`](governance_lgpd.md#5-vieses-e-mitigação).
+
 **API em tempo real**
 
 | Métrica | Tipo | O que vigia |
@@ -151,6 +164,7 @@ rotular por caminho com parâmetros explodiria a cardinalidade das séries.
 | `ApiIndisponivel` | `up{job="credit-scoring-api"} == 0` | critical |
 | `DriftDeFeature` | `credit_max_psi >= 0.25` | warning |
 | `QuedaDeDesempenho` | `credit_model_performance_delta{metric="roc_auc"} <= -0.03` | warning |
+| `DisparidadeEtaria` | `credit_fairness_disparate_impact_ratio < 0.8 or credit_fairness_equal_opportunity_gap > 0.10` | warning |
 
 Os limiares espelham `src/config/settings.py` de propósito: o pipeline já marca
 o alerta no laudo e o Prometheus apenas o promove a notificação — a regra de
@@ -159,10 +173,12 @@ negócio vive num lugar só.
 ## Dashboard Grafana
 
 `observability/grafana/dashboards/credit-scoring-drift.json`, provisionado
-automaticamente, com 11 painéis: quatro KPIs no topo (alertas ativos,
+automaticamente, com 13 painéis: quatro KPIs no topo (alertas ativos,
 degradação silenciosa, PSI máximo, inadimplência da carteira aprovada), o
 heatmap de PSI por feature × lote, as duas séries de AUC, a tabela de status
-das tarefas, as violações de contrato por regra e os dois painéis de API.
+das tarefas, as violações de contrato por regra, os dois painéis de API e os
+dois de equidade (razão de impacto desigual por lote e inadimplência aprovada
+por faixa etária).
 
 Cor segue a mesma disciplina do dashboard HTML: magnitude usa um só matiz
 (azul sequencial), estado usa a paleta de status, e nenhum gráfico tem dois

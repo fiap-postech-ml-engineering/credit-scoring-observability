@@ -84,7 +84,7 @@ E rode o projeto inteiro com um comando:
 make pipeline
 ```
 
-Em cerca de dois minutos isso baixa o dataset, treina o baseline, demonstra o contrato bloqueando um lote corrompido, gera os cinco lotes mensais com drift, roda a detecção e abre o caminho do dashboard consolidado.
+Em cerca de dois minutos isso baixa o dataset, treina o baseline, demonstra o contrato bloqueando um lote corrompido, gera os cinco lotes mensais com drift, roda a detecção, audita a equidade por faixa etária e abre o caminho do dashboard consolidado.
 
 ## 📁 Organização do projeto
 
@@ -146,6 +146,9 @@ Em cerca de dois minutos isso baixa o dataset, treina o baseline, demonstra o co
 │   │   ├── tracking.py       <- Runs de treino e de monitoramento no MLflow
 │   │   └── metrics.py        <- Métricas Prometheus + collectors que leem os laudos
 │   │
+│   ├── governance           <- ETAPA 4: auditoria de equidade
+│   │   └── fairness.py       <- Viés por faixa etária, modelo sem idade e teste de proxy
+│   │
 │   ├── pipeline             <- Orquestração
 │   │   ├── monitor.py        <- As 5 tarefas por lote, cronometradas e logadas
 │   │   ├── run.py            <- Execução ponta a ponta
@@ -159,7 +162,7 @@ Em cerca de dois minutos isso baixa o dataset, treina o baseline, demonstra o co
 │       ├── inference.py      <- Carregamento do modelo e decisão
 │       └── middleware.py     <- Log e métricas por requisição
 │
-└── tests                   <- 98 testes (pytest), markers contracts/drift/model/api
+└── tests                   <- 116 testes (pytest), markers contracts/drift/model/api
 ```
 
 ## 📚 Documentações
@@ -168,7 +171,7 @@ Em cerca de dois minutos isso baixa o dataset, treina o baseline, demonstra o co
 - [Simulação e Detecção de Drift](docs/drift_detection.md) — os cinco cenários, PSI vs. KS e o resultado lote a lote
 - [Observabilidade](docs/observability.md) — logs estruturados, MLflow, as métricas de saúde documentadas e os alertas
 - [Análise Causal](docs/causal_analysis.md) — o experimento fatorial que separa data drift de concept drift
-- [Governança e LGPD](docs/governance_lgpd.md) — base legal, decisão automatizada, vieses, retenção e segurança
+- [Governança e LGPD](docs/governance_lgpd.md) — base legal, decisão automatizada, viés medido por faixa etária, retenção e segurança
 - [Notebook de Análise](notebooks/analise_credit_scoring.ipynb) — não é exigido pelo enunciado, mas reúne EDA, limpeza, modelo, os cinco lotes de drift e a atribuição causal visualmente, num só lugar
 
 ## 🔄 Fluxograma do projeto
@@ -236,9 +239,9 @@ logs/pipeline.jsonl"]
 gateway de scrape"]
         U --> V["Prometheus"]
         V --> W["Grafana
-11 painéis"]
+13 painéis"]
         V --> X["alert_rules.yml
-6 alertas"]
+7 alertas"]
         S --> Y["dashboard.html
 visão consolidada"]
     end
@@ -268,6 +271,7 @@ make train         # treina o baseline e registra no MLflow
 make contracts     # demonstra o contrato bloqueando um lote corrompido
 make drift         # gera os cinco lotes mensais
 make attribution   # experimento causal: quanto é data, quanto é concept
+make fairness      # auditoria de equidade por faixa etária
 
 # serviços
 make stack         # API + MLflow + Prometheus + Grafana via Docker
@@ -279,7 +283,7 @@ make api           # só a API, local
 |---|---|---|
 | API | http://localhost:8000 | `/health`, `/score`, `/metrics`, `/monitoring/summary`, `/docs` |
 | MLflow | http://localhost:5000 | Runs de treino e de monitoramento, Model Registry |
-| Prometheus | http://localhost:9090 | Scrape de `api:8000/metrics` a cada 15s, 6 regras de alerta |
+| Prometheus | http://localhost:9090 | Scrape de `api:8000/metrics` a cada 15s, 7 regras de alerta |
 | Grafana | http://localhost:3000 | Login `admin`/`admin` — dashboard provisionado |
 | Dashboard HTML | `reports/dashboard.html` | Visão consolidada, offline, tema claro e escuro |
 
@@ -341,7 +345,7 @@ Nenhuma linha chegou ao modelo. Um teste de regressão falha se alguém afrouxar
 
 **Métricas de saúde documentadas** — pipeline (status e duração por tarefa, volume processado, timestamp da última execução), qualidade de dados (aprovação no contrato, violações por regra, taxa de rejeição), modelo (PSI por feature, features em drift, AUC, variação contra a baseline, alertas) e API (requisições, latência fim a fim, latência de inferência, distribuição de scores, decisões emitidas).
 
-**Seis alertas**, sendo quatro críticos. O mais importante:
+**Sete alertas**, sendo quatro críticos — inclusive um de disparidade entre faixas etárias. O mais importante:
 
 ```yaml
 - alert: DegradacaoSilenciosa
@@ -352,7 +356,7 @@ Nenhuma linha chegou ao modelo. Um teste de regressão falha se alguém afrouxar
 
 Esse alerta **só existe porque cruzamos as duas fontes**. Nenhum monitor de distribuição sozinho consegue levantá-lo.
 
-**Dois dashboards:** 11 painéis no Grafana (provisionados automaticamente) e um HTML consolidado de 46 KB que abre offline, com tema claro e escuro — a visão de cima que quinze relatórios separados não dão.
+**Dois dashboards:** 13 painéis no Grafana (provisionados automaticamente) e um HTML consolidado de 46 KB que abre offline, com tema claro e escuro — a visão de cima que quinze relatórios separados não dão.
 
 → Detalhes em [`docs/observability.md`](docs/observability.md)
 
@@ -385,7 +389,9 @@ O controle move o AUC em +0,0005 (ruído desprezível) e, em "só data drift", a
 
 **Uma ressalva honesta:** a atribuição limpa é possível porque *nós* geramos o drift. Em produção o rótulo chega com atraso (1 a 2 anos no crédito), e esse atraso é o obstáculo real. O que este projeto entrega é a camada que torna o diagnóstico possível assim que o rótulo chegar.
 
-→ Detalhes em [`docs/causal_analysis.md`](docs/causal_analysis.md)
+**Do diagnóstico à ação.** Cada alerta tem um critério objetivo de entrada e um dono: investigar, recalibrar (só para data drift), retreinar como *champion/challenger* com aprovação humana, rollback pelo Model Registry e revisão humana enquanto a degradação silenciosa ou a disparidade etária estiverem ativas. Recalibrar nunca é resposta a concept drift.
+
+→ Detalhes e plano de ação em [`docs/causal_analysis.md`](docs/causal_analysis.md)
 
 ---
 
@@ -415,13 +421,25 @@ O titular tem direito a revisão de decisões automatizadas que afetem seus inte
 
 **Necessário em produção, fora do escopo desta fase:** canal formal de contestação com revisão humana e prazo, explicação individual por decisão (SHAP ou equivalente) em linguagem acessível, e registro auditável de cada decisão emitida.
 
-### Vieses e mitigação
+### Vieses e mitigação — medidos, não só discutidos
 
-O modelo usa **idade**, que carrega peso real (PSI de 0,549 no lote `2024-04`) e é critério protegido em várias jurisdições. O próprio cenário de concept drift é, no fundo, um achado de equidade: o modelo **subestimava sistematicamente** o risco de jovens sem patrimônio imobiliário — o que vira prejuízo para a fintech e crédito impagável para o cliente.
+O modelo usa **idade**, critério protegido e com peso real (PSI de 0,549 no lote `2024-04`). Como o atributo está no dado, `src/governance/fairness.py` audita cada lote em quatro faixas etárias (`make fairness`, e também dentro de `make pipeline`), com dois limiares versionados e promovidos a alerta (`DisparidadeEtaria`) e a painel no Grafana: **razão de impacto desigual** < 0,8 (regra dos quatro quintos) e **diferença de aprovação entre bons pagadores** > 10 p.p.
 
-**O que não dá para verificar:** o Give Me Some Credit não traz gênero, raça, região ou estado civil. Este projeto **não consegue** medir disparidade entre grupos protegidos, e dizer o contrário seria falso. Ausência de atributo não é ausência de viés — renda, endividamento e CEP funcionam como proxies de raça e classe em qualquer carteira de crédito brasileira.
+**Na linha de base (lote estável, fora do treino), os dois disparam.** Um bom pagador de 18 a 29 anos tem **64%** de chance de ser aprovado; um bom pagador acima de 60, **93%** — e a faixa 18-29 inadimple *menos* que a 30-44.
 
-**Plano para produção:** coletar atributos protegidos separadamente, com base legal própria e acesso restrito, **apenas para auditoria de equidade**, nunca como feature; medir taxa de aprovação, falso positivo/negativo e calibração por grupo no mesmo pipeline que hoje mede PSI; definir limiar de disparidade com compliance e tratá-lo como os alertas de drift; revisar com o jurídico se o ganho preditivo da idade justifica o risco regulatório; e **testar proxies** — treinar um classificador para prever o atributo protegido a partir das features; se ele acerta bem, remover o atributo direto não resolve nada.
+| Lote | Razão de impacto | Dif. de oportunidade | Inadimpl. aprovada 18-29 | Inadimpl. aprovada 60+ |
+|---|---|---|---|---|
+| `2024-01_estavel` | 0,665 | 0,286 | 1,9% | 1,3% |
+| `2024-04_novo_perfil` | 0,617 | **0,312** | 3,6% | 0,8% |
+| `2024-05_recessao` | 0,622 | 0,224 | **25,7%** | 1,6% |
+
+O data drift piora a disparidade de aprovação (a base fica mais jovem justamente onde o modelo é pior). O concept drift muda o dano de lado: na recessão o modelo segue aprovando jovens que agora não pagam — **um quarto da carteira aprovada de 18 a 29 anos inadimple**. Equidade não é só aprovar igual; é também não empurrar dívida impagável para um grupo.
+
+**Tirar a idade do modelo não resolve.** Retreinado sem `age`, o modelo perde só 0,003 de AUC, e a disparidade cai pouco — continua acima dos dois limiares em todos os lotes. O motivo é o **teste de proxy**: as outras nove features preveem "tem de 18 a 29 anos" com **ROC AUC 0,918**. Remover a coluna remove o rótulo, não a informação.
+
+**O que não dá para verificar:** o Give Me Some Credit não traz gênero, raça, região ou estado civil — para esses grupos não há como medir disparidade, e dizer o contrário seria falso. O teste de proxy mostra por que ausência de atributo não é ausência de viés.
+
+**Plano para produção:** decidir o uso de idade com o jurídico com esses números na mesa; mitigar onde importa — limiar por faixa que iguale a aprovação de bons pagadores ou restrição de equidade no treino, com o custo em AUC decidido junto com compliance; coletar atributos protegidos separadamente, com base legal própria, **apenas para auditoria**, e estender a mesma auditoria a eles; e revisão humana obrigatória das recusas enquanto `DisparidadeEtaria` estiver ativo.
 
 ### Retenção e eliminação (arts. 15, 16 e 18)
 
@@ -443,7 +461,7 @@ Container como usuário **não-root**, build multi-stage sem ferramentas de buil
 
 ### Lacunas declaradas
 
-Não há revisão humana formalizada, não há explicação individual por decisão, e o dataset público não permite auditoria de equidade entre grupos protegidos. As três são pré-requisitos para operação real e estão endereçadas no plano acima — declaradas, não escondidas.
+Não há revisão humana formalizada, não há explicação individual por decisão, e o dataset público só permite auditar equidade por idade — onde a disparidade medida está acima dos limiares e não se resolve removendo a feature. As três são pré-requisitos para operação real e estão endereçadas no plano acima — declaradas, não escondidas.
 
 → Detalhes em [`docs/governance_lgpd.md`](docs/governance_lgpd.md)
 
@@ -464,13 +482,14 @@ Rodar `make pipeline` produz, em `reports/`:
 | `lote_corrompido__validation.json` | Laudo da rejeição pelo contrato |
 | `lote_corrompido__manifest.json` | Cruza "o que foi injetado" com "o que o contrato pegou" |
 | `atribuicao_causal.json` | Experimento fatorial e a decomposição da degradação |
+| `equidade_idade.json` | Auditoria de equidade por faixa etária, modelo sem idade e teste de proxy |
 | `pipeline_runs.json` | Histórico de execuções: status e duração por tarefa |
 
 Os HTMLs do Evidently pesam ~4 MB cada e são todos reproduzíveis com um comando, então o repositório versiona o dashboard consolidado, os laudos textuais (diffáveis) e **dois relatórios do Evidently escolhidos a dedo** — o de data drift do lote `2024-04_novo_perfil` (drift alto e visível) e o de classificação do `2024-05_recessao` (a degradação silenciosa). Os outros treze são gerados localmente.
 
 ## ✅ Qualidade
 
-**Testes.** 98 testes com **87% de cobertura**, rodando sobre dados sintéticos determinísticos — sem chamada ao Kaggle, sem artefato pré-treinado, sem rede. Markers: `contracts`, `drift`, `model`, `api`, `integration`.
+**Testes.** 116 testes com **87% de cobertura**, rodando sobre dados sintéticos determinísticos — sem chamada ao Kaggle, sem artefato pré-treinado, sem rede. Markers: `contracts`, `drift`, `model`, `api`, `integration`.
 
 Dois testes merecem destaque porque formalizam as teses do projeto:
 
