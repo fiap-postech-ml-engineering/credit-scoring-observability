@@ -8,7 +8,9 @@
    o portão e comprova que a ingestão é bloqueada (entregável da Etapa 1).
 4. **Simulação do drift** — gera os cinco lotes mensais de produção.
 5. **Monitoramento** — roda o pipeline completo em cada lote.
-6. **Consolidação** — grava o histórico de execuções e renderiza o dashboard HTML.
+6. **Auditoria de equidade** — taxa de aprovação e de erro por faixa etária em
+   cada lote, com e sem a idade no modelo (Etapa 4).
+7. **Consolidação** — grava o histórico de execuções e renderiza o dashboard HTML.
 
 Tudo é idempotente: rodar duas vezes não duplica dado nem invalida relatório.
 """
@@ -28,6 +30,7 @@ from src.contracts.validate import save_result_json, validate_batch
 from src.credit_scoring.dataset import prepare_datasets
 from src.credit_scoring.train import load_model, train
 from src.drift.simulate import SCENARIOS, build_all_batches
+from src.governance.fairness import run_fairness_audit, save_fairness
 from src.observability.logging_setup import setup_logging
 from src.pipeline.dashboard import render_dashboard
 from src.pipeline.monitor import PipelineRun, monitor_batch, save_runs
@@ -145,7 +148,16 @@ def run_all(retrain: bool = False, log_to_mlflow: bool = True) -> list[PipelineR
             # a falha já foi logada com stack trace em `_run_task`.
             logger.exception("lote abortado", extra={"batch": scenario.name})
 
-    # 6. Consolidação
+    # 6. Auditoria de equidade: o viés por faixa etária medido nos mesmos lotes
+    fairness_path = save_fairness(
+        run_fairness_audit(
+            batches={s.name: pd.read_csv(batch_paths[s.name]) for s in SCENARIOS},
+            reference=reference,
+            bundle=bundle,
+        )
+    )
+
+    # 7. Consolidação
     runs_path = save_runs(runs)
     dashboard_path = render_dashboard(runs)
 
@@ -156,6 +168,7 @@ def run_all(retrain: bool = False, log_to_mlflow: bool = True) -> list[PipelineR
             "com_alerta": sum(1 for r in runs if r.alerts),
             "runs_path": str(runs_path),
             "dashboard": str(dashboard_path),
+            "fairness": str(fairness_path),
         },
     )
     return runs

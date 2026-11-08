@@ -10,7 +10,7 @@ PYTHON_INTERPRETER = python
 # COMMANDS                                                                      #
 #################################################################################
 
-.PHONY: help requirements create_environment data train pipeline contracts drift attribution \
+.PHONY: help requirements create_environment data train pipeline contracts drift attribution fairness \
         dashboard mlflow api stack stack-down test test-slow test-cov lint lint-fix \
         lint-fix-unsafe format format-fix format-diff check check-slow clean clean-artifacts
 
@@ -26,6 +26,7 @@ help:
 	@echo "  make contracts           - Demonstra o contrato bloqueando um lote corrompido"
 	@echo "  make drift               - Gera os cinco lotes mensais de produção"
 	@echo "  make attribution         - Experimento causal: data drift vs. concept drift"
+	@echo "  make fairness            - Auditoria de equidade por faixa etária (Etapa 4)"
 	@echo "  make pipeline            - Execução ponta a ponta (dados -> relatórios)"
 	@echo "  make dashboard           - Caminho do dashboard HTML consolidado"
 	@echo ""
@@ -75,6 +76,9 @@ drift:
 
 attribution:
 	uv run python -m src.drift.attribution
+
+fairness:
+	uv run python -m src.governance.fairness
 
 contracts:
 	uv run python -c "from src.observability.logging_setup import setup_logging; setup_logging(); from src.pipeline.run import demo_contract_block; print(demo_contract_block())"
