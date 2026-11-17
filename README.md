@@ -486,7 +486,9 @@ make test-cov    # testes com relatório de cobertura em HTML
 
 ## 🎥 Vídeo Explicativo
 
-*(link a ser adicionado após a gravação)*
+[![Vídeo explicativo no YouTube](https://img.youtube.com/vi/YwMjW77K5O4/hqdefault.jpg)](https://youtu.be/YwMjW77K5O4)
+
+▶️ **Assista no YouTube:** https://youtu.be/YwMjW77K5O4
 
 **Situation** — uma fintech tem um modelo de crédito em produção e a economia mudou. A diretoria suspeita que ele está errando, mas ninguém consegue provar se está, desde quando, nem por quê. Degradação silenciosa é o pior tipo: não gera erro, não cai o serviço, só queima dinheiro.
 
