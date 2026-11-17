@@ -2,7 +2,7 @@
 
 Camada de **sustentação e confiabilidade** para um modelo de Credit Scoring em produção: contratos de qualidade de dados (Pandera), simulação e detecção de Data/Concept Drift (Evidently AI), observabilidade de pipeline e modelo (MLflow + Prometheus/Grafana) e governança sob a LGPD. Projeto desenvolvido para o Tech Challenge da Fase 4 do curso de Machine Learning Engineering da FIAP.
 
-Para um resumo rápido, também temos um 🎥 [Vídeo Explicativo em menos de 5 min (método STAR)](#-vídeo-explicativo)
+Para um resumo rápido, também temos um 🎥 [Vídeo Explicativo em menos de 5 min (método STAR)](https://youtu.be/YwMjW77K5O4)
 
 ---
 
